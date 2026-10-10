@@ -51,6 +51,9 @@ Vite solo expone al código las variables que empiezan por `VITE_`. **No pongas 
 | Variable | Descripción | Desarrollo |
 |---|---|---|
 | `VITE_API_URL` | URL base de la API | `http://localhost:8080/api` |
+| `VITE_USE_MOCKS` | `true`: las funciones de `src/api/` responden con datos simulados, sin backend. `false` o sin definir: usan el backend real | `false` |
+
+Con `VITE_USE_MOCKS=true` se entra con los mismos usuarios de prueba del backend (`estudiante@aprendizaje.test` / `Estudiante2026*`, etc.). Reinicia `npm run dev` después de cambiarla.
 
 ## 5. Estructura
 
