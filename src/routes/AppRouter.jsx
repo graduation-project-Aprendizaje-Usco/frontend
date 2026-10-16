@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react';
 import { Route, Routes } from 'react-router';
 import ProtectedRoute from './ProtectedRoute';
 import RedireccionInicial from './RedireccionInicial';
@@ -25,6 +26,10 @@ import InicioAdminPage from '../features/admin/InicioAdminPage';
 import UsuariosPage from '../features/admin/UsuariosPage';
 import RolesPage from '../features/admin/RolesPage';
 
+// Páginas de prueba de componentes: solo con `npm run dev`. En el build,
+// import.meta.env.DEV es false y Vite ni siquiera incluye estos archivos.
+const MathTextDemoPage = import.meta.env.DEV ? lazy(() => import('../features/dev/MathTextDemoPage')) : null;
+
 /**
  * Mapa de rutas. Para agregar una pantalla:
  *   1. Crear el componente en features/<modulo>/
@@ -38,6 +43,18 @@ export default function AppRouter() {
       <Route path="/" element={<RedireccionInicial />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/no-autorizado" element={<NoAutorizadoPage />} />
+
+      {/* Solo desarrollo */}
+      {MathTextDemoPage && (
+        <Route
+          path="/dev/mathtext"
+          element={
+            <Suspense fallback={null}>
+              <MathTextDemoPage />
+            </Suspense>
+          }
+        />
+      )}
 
       {/* Estudiante */}
       <Route element={<ProtectedRoute roles={[ROLES.ESTUDIANTE]} />}>
