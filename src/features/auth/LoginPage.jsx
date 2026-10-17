@@ -7,21 +7,24 @@
  *  - al enviar con errores, el foco va al primer campo inválido;
  *  - el error del servidor se anuncia con role="alert";
  *  - todo se puede completar con teclado y se envía con Enter.
+ *
+ * Si llega desde el registro (state.registrado), muestra el aviso de cuenta
+ * creada y deja el correo ya escrito.
  */
 import { useEffect, useState } from 'react';
-import { Navigate, useLocation } from 'react-router';
+import { Navigate, Link as RouterLink, useLocation } from 'react-router';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Alert, Box, Button, IconButton, InputAdornment, Stack, TextField, Typography } from '@mui/material';
+import { Alert, Button, IconButton, InputAdornment, Link, Stack, TextField, Typography } from '@mui/material';
 import LockOutlined from '@mui/icons-material/LockOutlined';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import { login as iniciarSesion } from '../../api/authApi';
 import { mensajeDeError } from '../../api/errores';
-import MarcaUsco from '../../components/MarcaUsco';
 import { useAuth } from '../../context/AuthContext';
 import { INICIO_POR_ROL } from '../../routes/navegacion';
+import PlantillaAcceso from './PlantillaAcceso';
 
 const esquema = z.object({
   correo: z
@@ -37,6 +40,7 @@ const inicioDelRol = (rol) => INICIO_POR_ROL[rol] ?? '/no-autorizado';
 export default function LoginPage() {
   const { user, login } = useAuth();
   const location = useLocation();
+  const recienRegistrado = Boolean(location.state?.registrado);
   const [verPassword, setVerPassword] = useState(false);
   const [errorServidor, setErrorServidor] = useState('');
 
@@ -46,7 +50,7 @@ export default function LoginPage() {
     formState: { errors, isSubmitting },
   } = useForm({
     resolver: zodResolver(esquema),
-    defaultValues: { correo: '', password: '' },
+    defaultValues: { correo: location.state?.correo ?? '', password: '' },
   });
 
   useEffect(() => {
@@ -78,130 +82,99 @@ export default function LoginPage() {
   };
 
   return (
-    <Box sx={{ minHeight: '100vh', display: 'flex', bgcolor: 'background.default' }}>
-      {/* Panel institucional: solo desde 900 px; en celular se muestra solo el formulario. */}
-      <Box
-        component="aside"
-        className="fondo-oscuro"
-        sx={{
-          display: { xs: 'none', md: 'flex' },
-          flexDirection: 'column',
-          justifyContent: 'space-between',
-          width: { md: 440, lg: 520 },
-          flexShrink: 0,
-          bgcolor: 'primary.main',
-          color: 'primary.contrastText',
-          px: 6,
-          py: 7,
-        }}
-      >
-        <MarcaUsco />
-        <Stack spacing={2.25}>
-          <Typography component="p" sx={{ fontSize: '2.25rem', fontWeight: 700, lineHeight: 1.15 }}>
-            Diagnostica, practica y sigue tu avance en Cálculo Diferencial.
+    <PlantillaAcceso>
+      <Stack component="form" noValidate onSubmit={handleSubmit(enviar)} aria-labelledby="titulo-login" spacing={2.5}>
+        <Stack spacing={0.75}>
+          <Typography id="titulo-login" variant="h4" component="h1">
+            Iniciar sesión
           </Typography>
-          <Typography sx={{ opacity: 0.9, maxWidth: 380 }}>
-            Prueba inicial de 24 ítems, práctica ajustada a tus resultados y retroalimentación en cada intento.
+          <Typography color="text.secondary">Usa tu correo institucional.</Typography>
+        </Stack>
+
+        {recienRegistrado && !errorServidor && (
+          <Alert severity="success" role="status">
+            Tu cuenta quedó creada. Inicia sesión con tu correo y tu contraseña.
+          </Alert>
+        )}
+
+        {errorServidor && (
+          // Colores del prototipo 02 (fondo rosado, texto rojo): contraste 6.1:1.
+          <Alert
+            severity="error"
+            role="alert"
+            sx={{
+              bgcolor: 'error.light',
+              color: 'error.main',
+              border: 1,
+              borderColor: 'error.main',
+              '& .MuiAlert-icon': { color: 'error.main' },
+            }}
+          >
+            {errorServidor}
+          </Alert>
+        )}
+
+        <TextField
+          id="correo"
+          label="Correo institucional"
+          type="email"
+          autoComplete="username"
+          placeholder="nombre@usco.edu.co"
+          required
+          error={Boolean(errors.correo)}
+          helperText={errors.correo?.message}
+          slotProps={{ inputLabel: { shrink: true } }}
+          {...campo('correo')}
+        />
+
+        <TextField
+          id="password"
+          label="Contraseña"
+          type={verPassword ? 'text' : 'password'}
+          autoComplete="current-password"
+          required
+          autoFocus={recienRegistrado}
+          error={Boolean(errors.password)}
+          helperText={errors.password?.message}
+          slotProps={{
+            inputLabel: { shrink: true },
+            input: {
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton
+                    onClick={() => setVerPassword((visible) => !visible)}
+                    aria-label={verPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                    aria-controls="password"
+                    edge="end"
+                  >
+                    {verPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            },
+          }}
+          {...campo('password')}
+        />
+
+        <Button type="submit" variant="contained" size="large" fullWidth loading={isSubmitting}>
+          Ingresar
+        </Button>
+
+        <Typography variant="body2" sx={{ textAlign: 'center' }}>
+          ¿Eres estudiante y aún no tienes cuenta?{' '}
+          <Link component={RouterLink} to="/registro" sx={{ fontWeight: 600 }}>
+            Crear cuenta
+          </Link>
+        </Typography>
+
+        <Stack direction="row" spacing={1} sx={{ color: 'text.secondary', alignItems: 'flex-start' }}>
+          <LockOutlined fontSize="small" aria-hidden="true" sx={{ mt: 0.25 }} />
+          <Typography variant="body2">
+            Tus datos se tratan conforme a la Ley 1581 de 2012. Antes de ingresar no se muestra información
+            académica de ningún usuario.
           </Typography>
         </Stack>
-        <Typography variant="body2" sx={{ opacity: 0.85 }}>
-          Universidad Surcolombiana · Facultad de Ingeniería
-          <br />
-          Piloto académico 2026-2
-        </Typography>
-      </Box>
-
-      <Box
-        component="main"
-        sx={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', px: 2, py: 4 }}
-      >
-        <Box
-          component="form"
-          noValidate
-          onSubmit={handleSubmit(enviar)}
-          aria-labelledby="titulo-login"
-          sx={{ width: '100%', maxWidth: 400 }}
-        >
-          <Stack spacing={2.5}>
-            <Stack spacing={0.75}>
-              <Typography id="titulo-login" variant="h4" component="h1">
-                Iniciar sesión
-              </Typography>
-              <Typography color="text.secondary">Usa tu correo institucional.</Typography>
-            </Stack>
-
-            {errorServidor && (
-              // Colores del prototipo 02 (fondo rosado, texto rojo): contraste 6.1:1.
-              <Alert
-                severity="error"
-                role="alert"
-                sx={{
-                  bgcolor: 'error.light',
-                  color: 'error.main',
-                  border: 1,
-                  borderColor: 'error.main',
-                  '& .MuiAlert-icon': { color: 'error.main' },
-                }}
-              >
-                {errorServidor}
-              </Alert>
-            )}
-
-            <TextField
-              id="correo"
-              label="Correo institucional"
-              type="email"
-              autoComplete="username"
-              placeholder="nombre@usco.edu.co"
-              required
-              error={Boolean(errors.correo)}
-              helperText={errors.correo?.message}
-              slotProps={{ inputLabel: { shrink: true } }}
-              {...campo('correo')}
-            />
-
-            <TextField
-              id="password"
-              label="Contraseña"
-              type={verPassword ? 'text' : 'password'}
-              autoComplete="current-password"
-              required
-              error={Boolean(errors.password)}
-              helperText={errors.password?.message}
-              slotProps={{
-                inputLabel: { shrink: true },
-                input: {
-                  endAdornment: (
-                    <InputAdornment position="end">
-                      <IconButton
-                        onClick={() => setVerPassword((visible) => !visible)}
-                        aria-label={verPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
-                        aria-controls="password"
-                        edge="end"
-                      >
-                        {verPassword ? <VisibilityOff /> : <Visibility />}
-                      </IconButton>
-                    </InputAdornment>
-                  ),
-                },
-              }}
-              {...campo('password')}
-            />
-
-            <Button type="submit" variant="contained" size="large" fullWidth loading={isSubmitting}>
-              Ingresar
-            </Button>
-
-            <Stack direction="row" spacing={1} sx={{ color: 'text.secondary', alignItems: 'flex-start' }}>
-              <LockOutlined fontSize="small" aria-hidden="true" sx={{ mt: 0.25 }} />
-              <Typography variant="body2">
-                Tus datos se tratan conforme a la Ley 1581 de 2012. Antes de ingresar no se muestra información
-                académica de ningún usuario.
-              </Typography>
-            </Stack>
-          </Stack>
-        </Box>
-      </Box>
-    </Box>
+      </Stack>
+    </PlantillaAcceso>
   );
 }

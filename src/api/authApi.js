@@ -26,8 +26,9 @@ export async function login({ correo, password }) {
 }
 
 /**
- * POST /api/auth/registro — solo estudiantes. 201 con el usuario creado; 409 si el correo ya existe.
- * @param {{ nombres: string, apellidos: string, correo: string, password: string, programaAcademico?: string }} datos
+ * POST /api/auth/registro — solo estudiantes. 201 con el usuario creado; 400 con "errores" por campo
+ * si no cumple las reglas (ver features/auth/reglasRegistro.js); 409 si el correo ya existe.
+ * @param {{ nombres: string, apellidos: string, correo: string, password: string, programaAcademico: string }} datos
  * @returns {Promise<{ id: number, nombres: string, correo: string, rol: 'ESTUDIANTE' }>}
  */
 export async function registro(datos) {

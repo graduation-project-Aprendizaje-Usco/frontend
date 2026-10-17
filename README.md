@@ -7,4 +7,4 @@ Interfaz web de **Aprendizaje USCO** (React 19 · Vite · MUI), plataforma de di
 - Cómo correrlo, variables de entorno y estructura: [docs/README-frontend.md](docs/README-frontend.md)
 - Convenciones de ramas, commits y PR: [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md)
 
-La insignia muestra el estado de la integración continua en `develop`: lint y build en cada PR, y un PR que no pasa no se puede fusionar.
+La insignia muestra el estado de la integración continua en `develop`: lint, pruebas y build en cada PR, y un PR que no pasa no se puede fusionar.

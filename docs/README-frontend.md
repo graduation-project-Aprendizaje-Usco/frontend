@@ -6,8 +6,8 @@ Interfaz web de **Aprendizaje USCO**, plataforma de diagnóstico, práctica adap
 
 | | |
 |---|---|
-| Stack | React 19 · Vite 8 · React Router 7 · MUI · Axios · Recharts · KaTeX |
-| Backend | [aprendizaje-usco-backend](https://github.com/aprendizaje-usco/aprendizaje-usco-backend) |
+| Stack | React 19 · Vite 8 · React Router 8 · MUI · Axios · Recharts · KaTeX · Vitest |
+| Backend | [aprendizaje-usco-backend](https://github.com/aprendizaje-usco-project/aprendizaje-usco-backend) |
 | Tablero | Jira, proyecto `AU` |
 | Convenciones | [CONTRIBUTING.md](CONTRIBUTING.md) |
 
@@ -24,7 +24,7 @@ Interfaz web de **Aprendizaje USCO**, plataforma de diagnóstico, práctica adap
 ## 2. Cómo correrlo en local
 
 ```bash
-git clone https://github.com/aprendizaje-usco/aprendizaje-usco-frontend.git
+git clone https://github.com/aprendizaje-usco-project/aprendizaje-usco-frontend.git
 cd aprendizaje-usco-frontend
 git checkout develop
 npm install
@@ -42,9 +42,18 @@ Abre http://localhost:5173.
 | `npm run build` | Build de producción en `dist/` |
 | `npm run preview` | Sirve el build de `dist/` para probarlo |
 | `npm run lint` | ESLint |
+| `npm test` | Pruebas automáticas (Vitest + Testing Library), una sola corrida |
+| `npm run test:watch` | Pruebas en modo vigilancia: se repiten al guardar |
 | `npm run format` | Prettier sobre `src/` |
 
-Antes de abrir un PR: `npm run lint` y `npm run build` sin errores.
+Antes de abrir un PR: `npm run lint`, `npm test` y `npm run build` sin errores (es lo mismo que corre CI).
+
+### Pruebas
+
+- Archivos `*.test.jsx` junto al componente que prueban (`LoginPage.jsx` → `LoginPage.test.jsx`).
+- Ayudas comunes en `src/test/utilidades.jsx`: `renderConApp()` (tema + enrutador + AuthProvider) y `tokenDePrueba()` (JWT con los claims del contrato).
+- Las funciones de `src/api/` se simulan con `vi.mock(...)`: las pruebas no necesitan el backend.
+- Cuidado con `beforeEach(() => algo.mockReset())`: si la flecha **devuelve** una función, Vitest la ejecuta como limpieza al final. Usa llaves: `beforeEach(() => { algo.mockReset(); })`.
 
 ## 4. Variables de entorno
 
@@ -64,11 +73,11 @@ src/
 ├── main.jsx          punto de entrada: BrowserRouter, ThemeProvider, CSS de KaTeX
 ├── App.jsx
 ├── api/              client.js (axios + token) y un archivo por módulo: authApi.js, diagnosticoApi.js…
-├── routes/           AppRouter.jsx, ProtectedRoute.jsx
-├── context/          AuthContext.jsx (usuario, rol, login, logout)
+├── routes/           AppRouter.jsx (páginas con carga diferida), ProtectedRoute.jsx
+├── context/          AuthContext.jsx (sesión: el rol sale del token; se confirma con /me)
 ├── layouts/          EstudianteLayout, DocenteLayout, AdminLayout
 ├── features/
-│   ├── auth/         login
+│   ├── auth/         login, registro, reglas del registro (reglasRegistro.js)
 │   ├── diagnostico/  prueba de 24 ítems, resultado
 │   ├── practica/     ejercicios, retroalimentación
 │   ├── progreso/     dashboard e historial del estudiante
@@ -76,6 +85,7 @@ src/
 │   └── admin/        usuarios y roles
 ├── components/       reutilizables: MathText, BarraProgreso, Temporizador…
 ├── theme/            theme.js con los colores institucionales
+├── test/             configuración y utilidades de las pruebas
 └── utils/
 ```
 
@@ -90,6 +100,7 @@ Reglas:
 | Ruta | Rol | Pantalla |
 |---|---|---|
 | `/login` | público | Inicio de sesión |
+| `/registro` | público | Registro de estudiantes (correo `u` + 11 dígitos + `@usco.edu.co`) |
 | `/estudiante` | ESTUDIANTE | Inicio del estudiante |
 | `/estudiante/diagnostico` | ESTUDIANTE | Prueba diagnóstica |
 | `/estudiante/practica` | ESTUDIANTE | Ejercicios adaptativos |
@@ -100,6 +111,14 @@ Reglas:
 | `/no-autorizado` | cualquiera | Acceso denegado |
 
 `ProtectedRoute` redirige a `/login` si no hay sesión y a `/no-autorizado` si el rol no corresponde. El backend vuelve a validar el rol en cada petición: la protección del frontend es solo de navegación.
+
+Cómo funciona la sesión (`AuthContext`):
+
+- El **rol, el id y el correo salen del token** (claims `rol`, `sub`, `correo`). En `localStorage` se guardan el `token` y, en `usuario`, solo el nombre a mostrar: editar `usuario` a mano no cambia el rol.
+- Al abrir la app con una sesión guardada se llama a `GET /api/auth/me`. Con 401 (token alterado, usuario desactivado) o si el rol cambió, se cierra la sesión. Sin conexión con el backend, se conserva.
+- La sesión se cierra sola al vencer el token, ante un 401 de cualquier petición, al cerrarla en otra pestaña y si el navegador muestra con "Atrás" una página guardada en su caché.
+
+Registro: las reglas de `features/auth/reglasRegistro.js` deben coincidir con `RegistroRequest.java` y `ProgramaAcademico.java` del backend (el backend es la fuente de verdad).
 
 ## 7. Convenciones de código
 
@@ -115,7 +134,7 @@ Reglas:
 | Módulo | Responsable principal |
 |---|---|
 | Configuración base, `routes/`, `layouts/`, `theme/`, staging | Nicolás Pérez |
-| `features/auth/`, `ProtectedRoute` | Fernando Pérez |
+| `features/auth/`, `ProtectedRoute`, `context/` | Fernando Pérez |
 | `features/diagnostico/`, `features/practica/` | Nicolás Pérez |
 | `features/progreso/`, dashboard en `features/docente/` | Fernando Pérez |
 | `features/admin/` (panel general) | Nicolás Pérez |
@@ -129,3 +148,5 @@ Reglas:
 | Cambié `.env.development` y no pasa nada | Reinicia `npm run dev`; Vite solo lee `.env` al arrancar |
 | Me saca al login a cada rato | El token expiró (120 min en desarrollo) |
 | `npm install` falla | Revisa tu versión de Node con `node -v` |
+| Una prueba falla mostrando un objeto `{ response: … }` que el componente sí atrapa | Un `beforeEach` devuelve la función simulada (ver "Pruebas") |
+| `git status` muestra cambios en `dist/` | `dist/` es el resultado del build y no se versiona; ya está en `.gitignore` |
