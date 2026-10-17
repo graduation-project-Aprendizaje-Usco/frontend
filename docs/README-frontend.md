@@ -51,6 +51,9 @@ Vite solo expone al código las variables que empiezan por `VITE_`. **No pongas 
 | Variable | Descripción | Desarrollo |
 |---|---|---|
 | `VITE_API_URL` | URL base de la API | `http://localhost:8080/api` |
+| `VITE_USE_MOCKS` | `true`: las funciones de `src/api/` responden con datos simulados, sin backend. `false` o sin definir: usan el backend real | `false` |
+
+Con `VITE_USE_MOCKS=true` se entra con los mismos usuarios de prueba del backend (`estudiante@aprendizaje.test` / `Estudiante2026*`, etc.). Reinicia `npm run dev` después de cambiarla.
 
 ## 5. Estructura
 
@@ -101,7 +104,7 @@ Reglas:
 - Componentes en `PascalCase.jsx`, un componente por archivo; hooks en `useAlgo.js`; utilidades en `camelCase.js`.
 - Componentes de función y hooks; nada de componentes de clase.
 - Estilos con MUI (`sx` o el tema); nada de colores sueltos: usa los del `theme`.
-- Notación matemática siempre con el componente `MathText` (KaTeX), nunca como texto plano ni imagen.
+- Notación matemática siempre con el componente `MathText` (KaTeX), nunca como texto plano ni imagen: `<MathText texto="Deriva $f(x) = \frac{x^2}{3}$" />`. Fórmulas en línea entre `$…$`, en bloque entre `$$…$$`, y `\$` para un signo de pesos. Con `npm run dev`, la página http://localhost:5173/dev/mathtext muestra ejemplos y permite probar cualquier texto.
 - Accesibilidad (RNF-05, WCAG 2.1 AA): cada input con `label`, imágenes con `alt`, todo navegable con teclado, contraste suficiente. MUI ayuda, pero no lo garantiza solo.
 - Mientras un endpoint no exista, usa datos simulados en el archivo de `api/` correspondiente, con la misma forma que el contrato acordado en Jira.
 
