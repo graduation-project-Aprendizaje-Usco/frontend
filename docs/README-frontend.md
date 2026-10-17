@@ -1,5 +1,7 @@
 # Aprendizaje USCO — Frontend
 
+[![CI](https://github.com/aprendizaje-usco-project/aprendizaje-usco-frontend/actions/workflows/ci.yml/badge.svg?branch=develop)](https://github.com/aprendizaje-usco-project/aprendizaje-usco-frontend/actions/workflows/ci.yml?query=branch%3Adevelop)
+
 Interfaz web de **Aprendizaje USCO**, plataforma de diagnóstico, práctica adaptativa y analítica de aprendizaje para Cálculo Diferencial (Proyecto Integrador II, Ingeniería de Software, Universidad Surcolombiana).
 
 | | |
