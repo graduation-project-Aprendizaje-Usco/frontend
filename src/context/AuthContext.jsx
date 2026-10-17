@@ -1,43 +1,74 @@
 /**
- * PROVISIONAL: sesión mínima para poder probar enrutador y layouts mientras se
- * integra la tarea de login (Fernando). Cumple el contrato que usan AppLayout,
- * ProtectedRoute y RedireccionInicial:
+ * Sesión del usuario (SCRUM-89). Contrato que usan AppLayout, ProtectedRoute y RedireccionInicial:
  *   useAuth() → { user, isAuthenticated, login, logout }
  *   user → { id, nombres, correo, rol } | null
- * Fernando la reemplaza por la versión con jwt-decode y validación de expiración,
- * manteniendo esos mismos nombres.
+ *
+ * - Al cargar la app lee el token guardado con jwt-decode; si está vencido o es inválido, lo descarta.
+ * - Cierra la sesión sola cuando el token vence, o cuando el backend responde 401
+ *   (api/client.js avisa con el evento EVENTO_SESION_EXPIRADA).
  */
-import { createContext, useCallback, useContext, useMemo, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { jwtDecode } from 'jwt-decode';
+import { CLAVE_TOKEN, EVENTO_SESION_EXPIRADA } from '../api/client';
 
-const CLAVE_TOKEN = 'token';
 const CLAVE_USUARIO = 'usuario';
 
 const AuthContext = createContext(null);
 
-function leerUsuarioGuardado() {
+/** Milisegundos que le quedan al token, o 0 si no hay, está mal formado o ya venció. */
+function vigenciaDelToken(token) {
   try {
-    const guardado = localStorage.getItem(CLAVE_USUARIO);
-    return guardado ? JSON.parse(guardado) : null;
+    const { exp } = jwtDecode(token);
+    return Math.max(0, exp * 1000 - Date.now());
   } catch {
-    return null;
+    return 0;
   }
 }
 
+function borrarSesion() {
+  localStorage.removeItem(CLAVE_TOKEN);
+  localStorage.removeItem(CLAVE_USUARIO);
+}
+
+function leerSesionGuardada() {
+  try {
+    const token = localStorage.getItem(CLAVE_TOKEN);
+    const usuario = JSON.parse(localStorage.getItem(CLAVE_USUARIO));
+    if (usuario && vigenciaDelToken(token) > 0) return usuario;
+  } catch {
+    // JSON dañado en localStorage: se trata como sesión inexistente.
+  }
+  borrarSesion();
+  return null;
+}
+
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(leerUsuarioGuardado);
+  const [user, setUser] = useState(leerSesionGuardada);
 
   /** Recibe la respuesta del login: { token, usuario: { id, nombres, correo, rol } }. */
   const login = useCallback(({ token, usuario }) => {
-    if (token) localStorage.setItem(CLAVE_TOKEN, token);
+    localStorage.setItem(CLAVE_TOKEN, token);
     localStorage.setItem(CLAVE_USUARIO, JSON.stringify(usuario));
     setUser(usuario);
   }, []);
 
   const logout = useCallback(() => {
-    localStorage.removeItem(CLAVE_TOKEN);
-    localStorage.removeItem(CLAVE_USUARIO);
+    borrarSesion();
     setUser(null);
   }, []);
+
+  // Cierra la sesión justo cuando vence el token, aunque el usuario no haga ninguna petición.
+  useEffect(() => {
+    if (!user) return undefined;
+    const temporizador = setTimeout(logout, vigenciaDelToken(localStorage.getItem(CLAVE_TOKEN)));
+    return () => clearTimeout(temporizador);
+  }, [user, logout]);
+
+  // Un 401 del backend (token vencido, usuario desactivado…) también cierra la sesión.
+  useEffect(() => {
+    window.addEventListener(EVENTO_SESION_EXPIRADA, logout);
+    return () => window.removeEventListener(EVENTO_SESION_EXPIRADA, logout);
+  }, [logout]);
 
   const valor = useMemo(() => ({ user, isAuthenticated: Boolean(user), login, logout }), [user, login, logout]);
 

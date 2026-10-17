@@ -9,7 +9,7 @@
  *  - todo se puede completar con teclado y se envía con Enter.
  */
 import { useEffect, useState } from 'react';
-import { Navigate, useNavigate } from 'react-router';
+import { Navigate, useLocation } from 'react-router';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -36,7 +36,7 @@ const inicioDelRol = (rol) => INICIO_POR_ROL[rol] ?? '/no-autorizado';
 
 export default function LoginPage() {
   const { user, login } = useAuth();
-  const navigate = useNavigate();
+  const location = useLocation();
   const [verPassword, setVerPassword] = useState(false);
   const [errorServidor, setErrorServidor] = useState('');
 
@@ -53,15 +53,19 @@ export default function LoginPage() {
     document.title = 'Iniciar sesión · Aprendizaje USCO';
   }, []);
 
-  // Con sesión abierta, /login lleva directo al inicio del rol.
-  if (user) return <Navigate to={inicioDelRol(user.rol)} replace />;
+  // Con sesión abierta (también justo después de login()), se sale de /login: a la ruta que
+  // se intentaba abrir (ProtectedRoute la guarda) si es de su rol, o al inicio del rol.
+  if (user) {
+    const inicio = inicioDelRol(user.rol);
+    const desde = location.state?.desde;
+    const destino = desde?.pathname.startsWith(inicio) ? `${desde.pathname}${desde.search}` : inicio;
+    return <Navigate to={destino} replace />;
+  }
 
   const enviar = async (datos) => {
     setErrorServidor('');
     try {
-      const respuesta = await iniciarSesion(datos);
-      login(respuesta);
-      navigate(inicioDelRol(respuesta.usuario.rol), { replace: true });
+      login(await iniciarSesion(datos));
     } catch (error) {
       setErrorServidor(mensajeDeError(error, 'No pudimos iniciar sesión. Intenta de nuevo.'));
     }
