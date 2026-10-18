@@ -4,9 +4,19 @@
  *
  * Usuarios: los mismos de prueba del backend (db/dev-data), para que cambiar
  * entre simulación y backend real no cambie las credenciales.
- * Los registros nuevos viven en memoria: se pierden al recargar la página.
+ * Los registros nuevos viven en memoria: se pierden al recargar la página. El registro
+ * aplica las mismas reglas del backend (correo de estudiante, contraseña, programa).
  */
 import { ROLES } from '../../routes/navegacion';
+import {
+  MENSAJE_CORREO_ESTUDIANTE,
+  MENSAJE_PASSWORD,
+  PASSWORD_MAX,
+  PASSWORD_MIN,
+  PATRON_CORREO_ESTUDIANTE,
+  PATRON_PASSWORD,
+  PROGRAMAS_ACADEMICOS,
+} from '../../features/auth/reglasRegistro';
 
 const DURACION_SEGUNDOS = 2 * 60 * 60;
 const RETARDO_MS = 400;
@@ -70,8 +80,30 @@ export async function login({ correo, password }) {
   return { token: tokenFalso(usuario), tipo: 'Bearer', expiraEn: DURACION_SEGUNDOS, usuario: usuarioPublico(usuario) };
 }
 
-export async function registro({ nombres, correo, password }) {
+/** Mismas validaciones del backend (RegistroRequest.java), con la misma forma de error 400. */
+function validarRegistro({ nombres, apellidos, correo, password, programaAcademico }) {
+  const errores = [];
+  if (!nombres?.trim()) errores.push({ campo: 'nombres', mensaje: 'Los nombres son obligatorios' });
+  if (!apellidos?.trim()) errores.push({ campo: 'apellidos', mensaje: 'Los apellidos son obligatorios' });
+  if (!PATRON_CORREO_ESTUDIANTE.test((correo ?? '').trim())) {
+    errores.push({ campo: 'correo', mensaje: MENSAJE_CORREO_ESTUDIANTE });
+  }
+  if (!password || password.length < PASSWORD_MIN || password.length > PASSWORD_MAX) {
+    errores.push({ campo: 'password', mensaje: 'La contraseña debe tener entre 8 y 72 caracteres' });
+  } else if (!PATRON_PASSWORD.test(password)) {
+    errores.push({ campo: 'password', mensaje: MENSAJE_PASSWORD });
+  }
+  if (!PROGRAMAS_ACADEMICOS.includes(programaAcademico)) {
+    errores.push({ campo: 'programaAcademico', mensaje: 'Elige un programa académico de la lista' });
+  }
+  return errores;
+}
+
+export async function registro(datos) {
   await esperar();
+  const { nombres, correo, password } = datos;
+  const errores = validarRegistro(datos);
+  if (errores.length) throw errorSimulado(400, 'La solicitud tiene campos inválidos', '/api/auth/registro', errores);
   const correoNormalizado = normalizarCorreo(correo);
   if (usuarios.some((u) => u.correo === correoNormalizado)) {
     throw errorSimulado(409, 'El correo ya está registrado', '/api/auth/registro');

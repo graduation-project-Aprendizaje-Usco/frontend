@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { Suspense, useEffect, useRef, useState } from 'react';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router';
 import {
   AppBar,
@@ -22,6 +22,7 @@ import MenuIcon from '@mui/icons-material/Menu';
 import LogoutOutlined from '@mui/icons-material/LogoutOutlined';
 import { useAuth } from '../context/AuthContext';
 import MarcaUsco from '../components/MarcaUsco';
+import CargandoPagina from '../components/CargandoPagina';
 import { DRAWER_ANCHO } from '../theme/theme';
 import { ETIQUETA_ROL, MENU_POR_ROL } from '../routes/navegacion';
 
@@ -233,7 +234,10 @@ export default function AppLayout({ rol }) {
         }}
       >
         <Toolbar />
-        <Outlet />
+        {/* Las páginas se cargan bajo demanda: mientras llegan, el menú y la barra siguen visibles. */}
+        <Suspense fallback={<CargandoPagina />}>
+          <Outlet />
+        </Suspense>
       </Box>
     </Box>
   );

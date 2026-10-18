@@ -97,6 +97,18 @@ Una tarea está **Hecha** cuando:
 
 - Nunca se suben contraseñas, llaves ni tokens. Si pasa por error, avisa de inmediato para rotarlos: borrar el commit no basta.
 - Los datos reales de estudiantes (resultados del instrumento, notas) **no** se suben al repositorio. Para pruebas se usan datos ficticios o anonimizados (Ley 1581 de 2012).
+- Backend: todo endpoint nuevo lleva `@PreAuthorize` con el rol que puede usarlo. La regla general solo exige sesión, así que sin la anotación cualquier rol entra. La prueba `ProteccionDeEndpointsTest` falla si falta.
+- No hay llaves ni contraseñas "por defecto" en `application.properties`: los valores de desarrollo van en `application-dev.properties` y los reales en las variables del hosting.
+
+## Finales de línea
+
+Ambos repositorios tienen un `.gitattributes` que guarda todo con LF. En Windows, configura una vez:
+
+```bash
+git config --global core.autocrlf false
+```
+
+Si después de actualizar `develop` git muestra archivos "modificados" sin cambios reales, corre `git add --renormalize .` y revisa con `git status`.
 
 ## Ritmo del equipo
 

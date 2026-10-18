@@ -1,0 +1,14 @@
+# Finales de línea uniformes para todo el equipo (Windows, Linux y CI).
+# Todo archivo de texto se guarda en el repositorio y se descarga con LF;
+# así git no marca como "modificados" archivos que solo cambiaron de CRLF a LF.
+* text=auto eol=lf
+
+# Scripts de Windows: siempre CRLF.
+*.cmd text eol=crlf
+*.bat text eol=crlf
+
+# Binarios: nunca convertir.
+*.woff2 binary
+*.png binary
+*.jpg binary
+*.ico binary
