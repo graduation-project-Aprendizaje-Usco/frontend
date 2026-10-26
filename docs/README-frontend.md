@@ -10,6 +10,7 @@ Interfaz web de **Aprendizaje USCO**, plataforma de diagnóstico, práctica adap
 | Backend | [aprendizaje-usco-backend](https://github.com/aprendizaje-usco-project/aprendizaje-usco-backend) |
 | Tablero | Jira, proyecto `AU` |
 | Convenciones | [CONTRIBUTING.md](CONTRIBUTING.md) |
+| Qué se ha implementado | [implementacion.md](implementacion.md) (historia por historia: qué hace, decisiones, cómo probarlo) |
 
 ---
 
