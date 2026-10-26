@@ -1,5 +1,6 @@
 import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { Route, Routes } from 'react-router';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { actual, finalizar, iniciar, responder } from '../../api/diagnosticoApi';
 import { renderConApp } from '../../test/utilidades';
@@ -36,13 +37,37 @@ const enCurso = (cambios = {}) => ({
   ...cambios,
 });
 
+const dimension = (codigo, nombre, aciertos, nivel, nivelDescripcion) => ({
+  codigo,
+  nombre,
+  aciertos,
+  total: 8,
+  porcentaje: (aciertos / 8) * 100,
+  nivel,
+  nivelDescripcion,
+});
+
 const finalizado = {
   id: 7,
   estado: 'FINALIZADO',
   items: [],
   respuestas: [],
-  resultado: { puntaje: 2, total: 3, categoriaDescripcion: 'Riesgo moderado' },
+  resultado: {
+    puntaje: 14,
+    total: 24,
+    categoria: 'RIESGO_MODERADO',
+    categoriaDescripcion: 'Riesgo moderado',
+    finalizadoPorTiempo: false,
+    finalizadoEn: '2026-10-18T14:30:12Z',
+    dimensiones: [
+      dimension('ALGEBRAICA', 'Competencia algebraica', 3, 'BAJO', 'Nivel bajo (alto riesgo)'),
+      dimension('LOGICA', 'Razonamiento lógico', 4, 'MEDIO', 'Nivel medio (riesgo moderado)'),
+      dimension('FUNCIONAL', 'Comprensión funcional', 7, 'ALTO', 'Nivel alto (adecuado)'),
+    ],
+  },
 };
+
+const verResultado = () => screen.findByRole('heading', { name: 'Resultado de tu diagnóstico' });
 
 async function entrarALaPrueba(usuario) {
   await usuario.click(await screen.findByRole('button', { name: 'Continuar la prueba' }));
@@ -140,7 +165,7 @@ describe('DiagnosticoPage', () => {
     await usuario.click(screen.getByText('Finalizar la prueba'));
     await usuario.click(screen.getByText('Sí, entregar'));
     expect(finalizar).toHaveBeenCalledWith(7);
-    expect(await screen.findByText('Puntaje: 2 de 3 · Riesgo moderado')).toBeInTheDocument();
+    expect(await verResultado()).toBeInTheDocument();
   });
 
   it('al llegar el tiempo a 0 entrega la prueba sola', async () => {
@@ -152,14 +177,65 @@ describe('DiagnosticoPage', () => {
     await entrarALaPrueba(usuario);
 
     await waitFor(() => expect(finalizar).toHaveBeenCalledWith(7), { timeout: 3000 });
-    expect(await screen.findByText('Puntaje: 2 de 3 · Riesgo moderado')).toBeInTheDocument();
+    expect(await verResultado()).toBeInTheDocument();
   });
 
   it('un intento FINALIZADO muestra el resultado y no deja volver a presentarla', async () => {
     actual.mockResolvedValue(finalizado);
     renderConApp(<DiagnosticoPage />);
 
-    expect(await screen.findByText('Puntaje: 2 de 3 · Riesgo moderado')).toBeInTheDocument();
+    expect(await verResultado()).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /Comenzar|Continuar/ })).not.toBeInTheDocument();
+  });
+});
+
+describe('Resultado del diagnóstico (SCRUM-26)', () => {
+  beforeEach(() => {
+    actual.mockReset();
+  });
+
+  it('muestra puntaje, categoría con texto y la tabla con los datos del backend', async () => {
+    actual.mockResolvedValue(finalizado);
+    renderConApp(<DiagnosticoPage />);
+    await verResultado();
+
+    expect(screen.getByText('14')).toBeInTheDocument();
+    expect(screen.getByText(/\/ 24 correctas/)).toBeInTheDocument();
+    expect(screen.getByText('Riesgo moderado')).toBeInTheDocument();
+
+    const filas = within(screen.getByRole('table')).getAllByRole('row').slice(1);
+    expect(filas.map((fila) => fila.textContent)).toEqual([
+      'Competencia algebraica3 de 838 %Nivel bajo (alto riesgo)',
+      'Razonamiento lógico4 de 850 %Nivel medio (riesgo moderado)',
+      'Comprensión funcional7 de 888 %Nivel alto (adecuado)',
+    ]);
+  });
+
+  it('recomienda reforzar las dimensiones sin nivel alto y lleva a la práctica', async () => {
+    actual.mockResolvedValue(finalizado);
+    const usuario = userEvent.setup();
+    renderConApp(
+      <Routes>
+        <Route path="/" element={<DiagnosticoPage />} />
+        <Route path="/estudiante/practica" element={<p>Práctica</p>} />
+      </Routes>,
+    );
+    await verResultado();
+
+    const recomendaciones = screen.getByRole('heading', { name: 'Lo que vas a reforzar primero' }).parentElement;
+    expect(recomendaciones).toHaveTextContent('Competencia algebraica');
+    expect(recomendaciones).toHaveTextContent('Razonamiento lógico');
+    expect(within(recomendaciones).getByRole('list')).not.toHaveTextContent('Comprensión funcional');
+
+    await usuario.click(screen.getByRole('button', { name: 'Empezar a practicar' }));
+    expect(await screen.findByText('Práctica')).toBeInTheDocument();
+  });
+
+  it('con todas las dimensiones en nivel alto felicita en vez de recomendar', async () => {
+    const todasAltas = finalizado.resultado.dimensiones.map((d) => ({ ...d, nivel: 'ALTO' }));
+    actual.mockResolvedValue({ ...finalizado, resultado: { ...finalizado.resultado, dimensiones: todasAltas } });
+    renderConApp(<DiagnosticoPage />);
+
+    expect(await screen.findByRole('heading', { name: '¡Buen punto de partida!' })).toBeInTheDocument();
   });
 });

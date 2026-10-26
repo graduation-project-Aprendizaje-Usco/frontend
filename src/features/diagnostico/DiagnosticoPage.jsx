@@ -5,12 +5,13 @@
  *  - FINALIZADO → su resultado (la prueba se presenta una sola vez).
  */
 import { useEffect, useState } from 'react';
-import { Alert, Paper, Typography } from '@mui/material';
+import { Alert } from '@mui/material';
 import { actual, iniciar } from '../../api/diagnosticoApi';
 import { mensajeDeError } from '../../api/errores';
 import CargandoPagina from '../../components/CargandoPagina';
 import InstruccionesDiagnostico from './InstruccionesDiagnostico';
 import PruebaDiagnostico from './PruebaDiagnostico';
+import ResultadoDiagnostico from './ResultadoDiagnostico';
 
 export default function DiagnosticoPage() {
   const [intento, setIntento] = useState(undefined); // undefined = cargando; null = aún no la inicia
@@ -43,20 +44,7 @@ export default function DiagnosticoPage() {
   if (error && intento === undefined) return <Alert severity="error">{error}</Alert>;
   if (intento === undefined) return <CargandoPagina />;
 
-  if (intento?.estado === 'FINALIZADO') {
-    // SCRUM-26 reemplaza este resumen por la pantalla completa de resultado.
-    const { resultado } = intento;
-    return (
-      <Paper variant="outlined" sx={{ p: { xs: 2, sm: 4 }, maxWidth: 760 }}>
-        <Typography variant="h4" component="h1" gutterBottom>
-          Resultado de tu diagnóstico
-        </Typography>
-        <Typography>
-          Puntaje: {resultado.puntaje} de {resultado.total} · {resultado.categoriaDescripcion}
-        </Typography>
-      </Paper>
-    );
-  }
+  if (intento?.estado === 'FINALIZADO') return <ResultadoDiagnostico resultado={intento.resultado} />;
 
   if (respondiendo) return <PruebaDiagnostico intento={intento} onFinalizada={setIntento} />;
 
