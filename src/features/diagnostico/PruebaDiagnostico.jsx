@@ -31,7 +31,10 @@ function useSegundosRestantes(inicial) {
   const [fin] = useState(() => Date.now() + inicial * 1000);
   const [restantes, setRestantes] = useState(inicial);
   useEffect(() => {
-    const intervalo = setInterval(() => setRestantes(Math.max(0, Math.round((fin - Date.now()) / 1000))), 1000);
+    const intervalo = setInterval(
+      () => setRestantes(Math.max(0, Math.round((fin - Date.now()) / 1000))),
+      1000,
+    );
     return () => clearInterval(intervalo);
   }, [fin]);
   return restantes;
@@ -50,6 +53,7 @@ export default function PruebaDiagnostico({ intento, onFinalizada }) {
     const primeroSinResponder = items.findIndex((item) => !respuestas.has(item.id));
     return primeroSinResponder === -1 ? 0 : primeroSinResponder;
   });
+  const [avisoSinRespuesta, setAvisoSinRespuesta] = useState(null); // id del ítem con el aviso
   const [confirmando, setConfirmando] = useState(false);
   const [finalizando, setFinalizando] = useState(false);
   const [errorFinalizar, setErrorFinalizar] = useState('');
@@ -106,6 +110,12 @@ export default function PruebaDiagnostico({ intento, onFinalizada }) {
   const respondidas = respuestas.size;
   const sinResponder = items.length - respondidas;
   const entregandoPorTiempo = restantes === 0 && finalizando;
+  // PV-01 (prototipo 08): "Siguiente" sin responder avisa y ofrece "Saltar ítem"; se quita al responder o al moverse.
+  const conAviso = avisoSinRespuesta === item.id && !respuestas.has(item.id);
+  const irA = (i) => {
+    setAvisoSinRespuesta(null);
+    setIndice(i);
+  };
 
   return (
     <Stack spacing={2.5} sx={{ maxWidth: 820 }}>
@@ -114,24 +124,41 @@ export default function PruebaDiagnostico({ intento, onFinalizada }) {
         spacing={1}
         sx={{ justifyContent: 'space-between', alignItems: { sm: 'center' } }}
       >
-        <Typography ref={tituloRef} tabIndex={-1} variant="h5" component="h1" sx={{ outline: 'none' }}>
+        <Typography
+          ref={tituloRef}
+          tabIndex={-1}
+          variant="h5"
+          component="h1"
+          sx={{ outline: 'none' }}
+        >
           Prueba diagnóstica
         </Typography>
         <Typography
           role="timer"
           aria-label={`Tiempo restante ${formatear(restantes)}`}
-          sx={{ fontWeight: 700, fontVariantNumeric: 'tabular-nums', color: restantes <= AVISO_SEGUNDOS ? 'warning.main' : 'text.primary' }}
+          sx={{
+            fontWeight: 700,
+            fontVariantNumeric: 'tabular-nums',
+            color: restantes <= AVISO_SEGUNDOS ? 'warning.main' : 'text.primary',
+          }}
         >
           Tiempo restante {formatear(restantes)}
         </Typography>
       </Stack>
 
       {restantes <= AVISO_SEGUNDOS && restantes > 0 && (
-        <Alert severity="warning">Quedan menos de 5 minutos. Al llegar a 0 la prueba se entrega sola.</Alert>
+        <Alert severity="warning">
+          Quedan menos de 5 minutos. Al llegar a 0 la prueba se entrega sola.
+        </Alert>
       )}
 
       <Box>
-        <Typography variant="body2" color="text.secondary" id="progreso-diagnostico" sx={{ mb: 0.5 }}>
+        <Typography
+          variant="body2"
+          color="text.secondary"
+          id="progreso-diagnostico"
+          sx={{ mb: 0.5 }}
+        >
           {respondidas} de {items.length} respondidas
         </Typography>
         <LinearProgress
@@ -142,7 +169,24 @@ export default function PruebaDiagnostico({ intento, onFinalizada }) {
         />
       </Box>
 
-      <Paper variant="outlined" sx={{ p: { xs: 2, sm: 3 } }}>
+      <Paper
+        variant="outlined"
+        sx={{ p: { xs: 2, sm: 3 }, ...(conAviso && { borderColor: 'error.main', borderWidth: 2 }) }}
+      >
+        {conAviso && (
+          <Alert
+            severity="error"
+            sx={{ mb: 2 }}
+            action={
+              <Button color="inherit" size="small" onClick={() => irA(indice + 1)}>
+                Saltar ítem
+              </Button>
+            }
+          >
+            Selecciona una opción para continuar. Si prefieres dejarlo para el final, usa «Saltar
+            ítem»: quedará sin responder en el mapa.
+          </Alert>
+        )}
         <ItemDiagnostico
           key={item.id}
           item={item}
@@ -154,11 +198,16 @@ export default function PruebaDiagnostico({ intento, onFinalizada }) {
           onReintentar={() => guardar(item.id, respuestas.get(item.id))}
         />
         <Stack direction="row" spacing={1.5} sx={{ justifyContent: 'space-between', mt: 2 }}>
-          <Button variant="outlined" onClick={() => setIndice(indice - 1)} disabled={indice === 0}>
+          <Button variant="outlined" onClick={() => irA(indice - 1)} disabled={indice === 0}>
             Anterior
           </Button>
           {indice < items.length - 1 ? (
-            <Button variant="contained" onClick={() => setIndice(indice + 1)}>
+            <Button
+              variant="contained"
+              onClick={() =>
+                respuestas.has(item.id) ? irA(indice + 1) : setAvisoSinRespuesta(item.id)
+              }
+            >
               Siguiente
             </Button>
           ) : (
@@ -183,8 +232,17 @@ export default function PruebaDiagnostico({ intento, onFinalizada }) {
                 variant={respondido ? 'contained' : 'outlined'}
                 aria-current={i === indice ? 'step' : undefined}
                 aria-label={`Ítem ${i + 1}, ${respondido ? 'respondido' : 'sin responder'}`}
-                onClick={() => setIndice(i)}
-                sx={{ minWidth: 44, minHeight: 44, p: 0, ...(i === indice && { outline: 2, outlineColor: 'primary.dark', outlineOffset: 2 }) }}
+                onClick={() => irA(i)}
+                sx={{
+                  minWidth: 44,
+                  minHeight: 44,
+                  p: 0,
+                  ...(i === indice && {
+                    outline: 2,
+                    outlineColor: 'primary.dark',
+                    outlineOffset: 2,
+                  }),
+                }}
               >
                 {i + 1}
               </Button>
@@ -204,8 +262,14 @@ export default function PruebaDiagnostico({ intento, onFinalizada }) {
 
       {errorFinalizar && <Alert severity="error">{errorFinalizar}</Alert>}
 
-      <Dialog open={confirmando || finalizando} onClose={() => !finalizando && setConfirmando(false)} aria-labelledby="titulo-finalizar">
-        <DialogTitle id="titulo-finalizar">{entregandoPorTiempo ? 'Se acabó el tiempo' : '¿Entregar la prueba?'}</DialogTitle>
+      <Dialog
+        open={confirmando || finalizando}
+        onClose={() => !finalizando && setConfirmando(false)}
+        aria-labelledby="titulo-finalizar"
+      >
+        <DialogTitle id="titulo-finalizar">
+          {entregandoPorTiempo ? 'Se acabó el tiempo' : '¿Entregar la prueba?'}
+        </DialogTitle>
         <DialogContent>
           <DialogContentText>
             {entregandoPorTiempo

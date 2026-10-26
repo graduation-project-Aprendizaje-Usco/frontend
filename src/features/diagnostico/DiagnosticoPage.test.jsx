@@ -21,7 +21,11 @@ const item = (id) => ({
   imagen: null,
   imagenAlt: null,
   dimension: DIMENSION,
-  opciones: [1, 2, 3, 4].map((n) => ({ id: id * 10 + n, letra: 'ABCD'[n - 1], texto: `$${n * id}$` })),
+  opciones: [1, 2, 3, 4].map((n) => ({
+    id: id * 10 + n,
+    letra: 'ABCD'[n - 1],
+    texto: `$${n * id}$`,
+  })),
 });
 
 /** Intento EN_CURSO de 3 ítems; el ítem 1 ya está respondido. */
@@ -107,7 +111,10 @@ describe('DiagnosticoPage', () => {
     expect(screen.getByText('Ítem 2 de 3 · Competencia algebraica')).toBeInTheDocument();
     expect(screen.getByText('1 de 3 respondidas')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Ítem 1, respondido' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Ítem 2, sin responder' })).toHaveAttribute('aria-current', 'step');
+    expect(screen.getByRole('button', { name: 'Ítem 2, sin responder' })).toHaveAttribute(
+      'aria-current',
+      'step',
+    );
   });
 
   it('guarda la respuesta al elegirla y lo anuncia', async () => {
@@ -121,12 +128,55 @@ describe('DiagnosticoPage', () => {
     // El grupo de opciones se etiqueta con el enunciado (lo anuncia el lector de pantalla).
     // Se revisa aria-labelledby a mano: jsdom no calcula nombres accesibles con el MathML de KaTeX.
     const opciones = screen.getByRole('radiogroup');
-    expect(document.getElementById(opciones.getAttribute('aria-labelledby'))).toHaveTextContent('Pregunta 2');
+    expect(document.getElementById(opciones.getAttribute('aria-labelledby'))).toHaveTextContent(
+      'Pregunta 2',
+    );
     await usuario.click(within(opciones).getAllByRole('radio')[2]);
 
     expect(responder).toHaveBeenCalledWith(7, 2, 23);
     expect(await screen.findByText('Respuesta guardada')).toBeInTheDocument();
     expect(screen.getByText('2 de 3 respondidas')).toBeInTheDocument();
+  });
+
+  it('"Siguiente" sin responder avisa y ofrece saltar el ítem (PV-01)', async () => {
+    actual.mockResolvedValue(enCurso());
+    iniciar.mockResolvedValue(enCurso());
+    responder.mockResolvedValue({});
+    const usuario = userEvent.setup();
+    renderConApp(<DiagnosticoPage />);
+    await entrarALaPrueba(usuario);
+
+    // Está en el ítem 2, sin responder: "Siguiente" no avanza y muestra el aviso.
+    await usuario.click(screen.getByText('Siguiente'));
+    expect(screen.getByText(/Selecciona una opción para continuar/)).toBeInTheDocument();
+    expect(screen.getByText('Ítem 2 de 3 · Competencia algebraica')).toBeInTheDocument();
+
+    // Al responder, el aviso desaparece y "Siguiente" ya avanza.
+    await usuario.click(within(screen.getByRole('radiogroup')).getAllByRole('radio')[0]);
+    expect(screen.queryByText(/Selecciona una opción para continuar/)).not.toBeInTheDocument();
+
+    // En el ítem 3 sin responder (el último), "Saltar ítem" no aplica: se ofrece "Finalizar".
+    await usuario.click(screen.getByText('Siguiente'));
+    expect(screen.getByText('Ítem 3 de 3 · Competencia algebraica')).toBeInTheDocument();
+  });
+
+  it('"Saltar ítem" deja el ítem sin responder y avanza', async () => {
+    actual.mockResolvedValue(
+      enCurso({ items: [item(1), item(2), item(3), item(4)], totalItems: 4 }),
+    );
+    iniciar.mockResolvedValue(
+      enCurso({ items: [item(1), item(2), item(3), item(4)], totalItems: 4 }),
+    );
+    const usuario = userEvent.setup();
+    renderConApp(<DiagnosticoPage />);
+    await entrarALaPrueba(usuario);
+
+    await usuario.click(screen.getByText('Siguiente'));
+    await usuario.click(screen.getByText('Saltar ítem'));
+
+    expect(screen.getByText('Ítem 3 de 4 · Competencia algebraica')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Ítem 2, sin responder' })).toBeInTheDocument();
+    expect(responder).not.toHaveBeenCalled();
   });
 
   it('si falla el guardado permite reintentar', async () => {
@@ -222,10 +272,14 @@ describe('Resultado del diagnóstico (SCRUM-26)', () => {
     );
     await verResultado();
 
-    const recomendaciones = screen.getByRole('heading', { name: 'Lo que vas a reforzar primero' }).parentElement;
+    const recomendaciones = screen.getByRole('heading', {
+      name: 'Lo que vas a reforzar primero',
+    }).parentElement;
     expect(recomendaciones).toHaveTextContent('Competencia algebraica');
     expect(recomendaciones).toHaveTextContent('Razonamiento lógico');
-    expect(within(recomendaciones).getByRole('list')).not.toHaveTextContent('Comprensión funcional');
+    expect(within(recomendaciones).getByRole('list')).not.toHaveTextContent(
+      'Comprensión funcional',
+    );
 
     await usuario.click(screen.getByRole('button', { name: 'Empezar a practicar' }));
     expect(await screen.findByText('Práctica')).toBeInTheDocument();
@@ -233,9 +287,14 @@ describe('Resultado del diagnóstico (SCRUM-26)', () => {
 
   it('con todas las dimensiones en nivel alto felicita en vez de recomendar', async () => {
     const todasAltas = finalizado.resultado.dimensiones.map((d) => ({ ...d, nivel: 'ALTO' }));
-    actual.mockResolvedValue({ ...finalizado, resultado: { ...finalizado.resultado, dimensiones: todasAltas } });
+    actual.mockResolvedValue({
+      ...finalizado,
+      resultado: { ...finalizado.resultado, dimensiones: todasAltas },
+    });
     renderConApp(<DiagnosticoPage />);
 
-    expect(await screen.findByRole('heading', { name: '¡Buen punto de partida!' })).toBeInTheDocument();
+    expect(
+      await screen.findByRole('heading', { name: '¡Buen punto de partida!' }),
+    ).toBeInTheDocument();
   });
 });
