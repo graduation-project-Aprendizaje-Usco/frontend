@@ -11,6 +11,7 @@ Se actualiza con cada historia que entra a `develop`.
 | [Componente MathText](#3-componente-mathtext-scrum-160) | SCRUM-160 | Nicolás Pérez | En `develop` |
 | [Prueba diagnóstica](#4-prueba-diagnóstica-scrum-25) | SCRUM-25 (134–139) | Nicolás Pérez | En `develop` |
 | [Resultado del diagnóstico](#5-resultado-del-diagnóstico-scrum-26) | SCRUM-26 (140–142) | Nicolás Pérez | En `develop` |
+| [Práctica adaptativa y retroalimentación](#6-práctica-adaptativa-y-retroalimentación-110-114) | 110, 114 | Juan David Polanco (interfaz base: Fernando Pérez) | En esta rama |
 | Registro de estudiantes | — (revisión de autenticación) | Jorel Vargas | En `develop` |
 
 ---
@@ -117,6 +118,30 @@ Se actualiza con cada historia que entra a `develop`.
 **Pruebas de 4 y 5.** `DiagnosticoPage.test.jsx`: 12 pruebas (comenzar, continuar y retomar, guardar y reintentar, «Saltar ítem», confirmar al finalizar, entrega por tiempo, resultado, tabla, recomendaciones).
 
 **Cómo probarlo a mano.** Registrar un estudiante en `/registro` (correo `u` + 11 dígitos + `@usco.edu.co`), entrar a **Diagnóstico** y presentar la prueba. Para repetirla hace falta otro estudiante.
+
+---
+
+## 6. Práctica adaptativa y retroalimentación (110, 114)
+
+**Para qué.** Que el estudiante resuelva ejercicios uno tras otro y reciba, en la misma respuesta del servidor, si acertó y qué hacer para entender el procedimiento. El intento se registra una sola vez aunque el navegador lo reenvíe.
+
+| Archivo | Subtarea | Qué hace |
+|---|---|---|
+| `api/practicaApi.js` | 105 | `siguiente()` y `responder()` contra `/api/practica`; deja pasar el error HTTP para distinguir un 404 de un fallo de red |
+| `PracticaPage.jsx` | 106–108, 113 | Enunciado con MathText, opción múltiple o respuesta numérica, estado de envío, pista antes de responder, reintento del segundo intento y botón para el siguiente ejercicio |
+| `PanelRetroalimentacion.jsx` | 111–112 | Panel bajo el ejercicio con pista o explicación, error común en MathText, `aria-live`, foco al aparecer y aviso de que el segundo fallo fue el último intento |
+
+**Decisiones.**
+
+- **El feedback lo decide el backend.** El frontend no arma textos: muestra `retroalimentacion.tipo`, `texto` y `errorComun` tal como llegan en `POST /api/practica/intentos`.
+- **Pista antes de responder:** el botón «Ver pista» revela la pista del ejercicio y envía `pistaUsada: true` en el intento.
+- **Idempotencia en el navegador:** se genera un UUID al preparar el envío y se conserva si la petición falla; al reintentar se envía la misma clave. Tras una respuesta confirmada se descarta, para que el segundo intento pedagógico use una clave nueva.
+- **Doble clic:** un bloqueo síncrono evita lanzar dos peticiones mientras el backend confirma. El backend también protege la clave de idempotencia ante envíos simultáneos.
+- **Accesibilidad:** el panel usa `role="status"`, `aria-live="polite"` y recibe el foco al aparecer; el resultado no depende solo del color.
+
+**Pruebas.** `PracticaPage.test.jsx` (carga, acierto, primer fallo, segundo fallo sin reintento, respuesta numérica, reintento de red con la misma clave, doble clic, teclado, 404 y pista), `PanelRetroalimentacion.test.jsx` (pista, explicación, acierto y ausencia de feedback) y `practicaApi.test.js` (contrato).
+
+**Cómo probarlo a mano.** Entrar como estudiante, abrir **Práctica**, pedir una pista, responder mal una vez (debe aparecer «Pista»), pulsar «Intentar de nuevo», volver a fallar (debe aparecer «Explicación» y el aviso del último intento) y comprobar que el siguiente ejercicio carga sin recargar.
 
 ---
 

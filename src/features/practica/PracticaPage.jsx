@@ -24,6 +24,7 @@ import { Link } from 'react-router';
 import { responder, siguiente } from '../../api/practicaApi';
 import { mensajeDeError } from '../../api/errores';
 import MathText from '../../components/MathText';
+import PanelRetroalimentacion from './PanelRetroalimentacion';
 
 const ASIGNATURA = 'CALCULO_DIFERENCIAL';
 const NOMBRE_NIVEL = { 1: 'Básico', 2: 'Intermedio', 3: 'Avanzado' };
@@ -202,6 +203,7 @@ export default function PracticaPage() {
     setErrorEnvio('');
     solicitudPendiente.current = null;
     inicioIntento.current = Date.now();
+    tituloRef.current?.focus();
   };
 
   const hayRespuesta = validarRespuesta();
@@ -408,28 +410,7 @@ export default function PracticaPage() {
                 </Alert>
               )}
 
-              {resultado && (
-                <Alert
-                  severity={resultadoCorrecto ? 'success' : 'error'}
-                  icon={resultadoCorrecto ? <CheckCircleOutlineOutlined /> : undefined}
-                  role="status"
-                  aria-live="polite"
-                  sx={{ mt: 2 }}
-                >
-                  <Typography component="p" sx={{ fontWeight: 700 }}>
-                    {resultadoCorrecto ? 'Respuesta correcta.' : 'Respuesta incorrecta.'}
-                  </Typography>
-                  {resultado.retroalimentacion?.texto && (
-                    <MathText texto={resultado.retroalimentacion.texto} component="div" />
-                  )}
-                  {resultado.retroalimentacion?.errorComun && (
-                    <MathText
-                      texto={`Error frecuente: ${resultado.retroalimentacion.errorComun}`}
-                      component="div"
-                    />
-                  )}
-                </Alert>
-              )}
+              <PanelRetroalimentacion resultado={resultado} />
 
               {pistaMostrada && ejercicio.pista && !resultado && (
                 <Alert severity="info" icon={<LightbulbOutlined />} sx={{ mt: 2 }}>
@@ -455,7 +436,7 @@ export default function PracticaPage() {
                   onClick={() => setPistaMostrada(true)}
                   disabled={pistaMostrada || enviando || Boolean(errorEnvio)}
                 >
-                  {pistaMostrada ? 'Pista mostrada' : 'Pedir una pista'}
+                  {pistaMostrada ? 'Pista mostrada' : 'Ver pista'}
                 </Button>
               )}
               {!resultado && (
