@@ -8,8 +8,9 @@ Interfaz web de **Aprendizaje USCO**, plataforma de diagnóstico, práctica adap
 |---|---|
 | Stack | React 19 · Vite 8 · React Router 8 · MUI · Axios · Recharts · KaTeX · Vitest |
 | Backend | [aprendizaje-usco-backend](https://github.com/aprendizaje-usco-project/aprendizaje-usco-backend) |
-| Tablero | Jira, proyecto `AU` |
+| Tablero | Jira, proyecto `SCRUM` |
 | Convenciones | [CONTRIBUTING.md](CONTRIBUTING.md) |
+| Manual técnico | [manual-tecnico.md](https://github.com/aprendizaje-usco-project/aprendizaje-usco-backend/blob/develop/docs/manual-tecnico.md) en el backend (arquitectura, despliegue, instalación completa) |
 | Qué se ha implementado | [implementacion.md](implementacion.md) (historia por historia: qué hace, decisiones, cómo probarlo) |
 
 ---
@@ -98,18 +99,22 @@ Reglas:
 
 ## 6. Rutas y roles
 
-| Ruta | Rol | Pantalla |
-|---|---|---|
-| `/login` | público | Inicio de sesión |
-| `/registro` | público | Registro de estudiantes (correo `u` + 11 dígitos + `@usco.edu.co`) |
-| `/estudiante` | ESTUDIANTE | Inicio del estudiante |
-| `/estudiante/diagnostico` | ESTUDIANTE | Prueba diagnóstica |
-| `/estudiante/practica` | ESTUDIANTE | Ejercicios adaptativos |
-| `/estudiante/progreso` | ESTUDIANTE | Dashboard e historial |
-| `/docente` | DOCENTE | Dashboard de desempeño del grupo |
-| `/docente/actividades` | DOCENTE | Gestión de actividades y contenidos |
-| `/admin` | ADMIN | Usuarios y roles |
-| `/no-autorizado` | cualquiera | Acceso denegado |
+| Ruta | Rol | Pantalla | Estado |
+|---|---|---|---|
+| `/login` | público | Inicio de sesión | Lista |
+| `/registro` | público | Registro de estudiantes (correo `u` + 11 dígitos + `@usco.edu.co`) | Lista |
+| `/estudiante` | ESTUDIANTE | Inicio del estudiante | En construcción |
+| `/estudiante/diagnostico` | ESTUDIANTE | Prueba diagnóstica y resultado | Lista |
+| `/estudiante/practica` | ESTUDIANTE | Ejercicios adaptativos | Lista |
+| `/estudiante/progreso` | ESTUDIANTE | Historial de resultados; luego el dashboard de progreso (SCRUM-38) | Historial en PR (`feature/historial`) |
+| `/docente` | DOCENTE | Dashboard de desempeño del grupo (SCRUM-40) | En construcción |
+| `/docente/estudiantes` | DOCENTE | Estudiantes y su detalle | En construcción |
+| `/docente/actividades` | DOCENTE | Gestión de actividades y contenidos | En construcción |
+| `/docente/reportes` | DOCENTE | Reportes | En construcción |
+| `/admin` · `/admin/usuarios` · `/admin/roles` | ADMIN | Panel, usuarios y roles | En construcción |
+| `/no-autorizado` | cualquiera | Acceso denegado | Lista |
+
+«En construcción»: la ruta y el menú existen, pero la pantalla todavía muestra `PaginaEnConstruccion`.
 
 `ProtectedRoute` redirige a `/login` si no hay sesión y a `/no-autorizado` si el rol no corresponde. El backend vuelve a validar el rol en cada petición: la protección del frontend es solo de navegación.
 
