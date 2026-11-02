@@ -102,8 +102,13 @@ describe('PracticaPage', () => {
     await usuario.click(screen.getByRole('button', { name: 'Comprobar respuesta' }));
     expect(await screen.findByText('Respuesta incorrecta.')).toBeInTheDocument();
     expect(screen.getByText(/Omitir el factor/)).toBeInTheDocument();
+    // El botón "Comprobar respuesta" desaparece: el foco va a la retroalimentación, no se pierde.
+    await waitFor(() =>
+      expect(document.activeElement).toHaveTextContent('Respuesta incorrecta.'),
+    );
 
     await usuario.click(screen.getByRole('button', { name: 'Intentar de nuevo' }));
+    expect(document.activeElement).toBe(document.querySelector('h2'));
     await elegirOpcion(311);
     await usuario.click(screen.getByRole('button', { name: 'Comprobar respuesta' }));
     await screen.findByText('Respuesta correcta.');

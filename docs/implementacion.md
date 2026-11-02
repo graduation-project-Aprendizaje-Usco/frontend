@@ -11,6 +11,7 @@ Se actualiza con cada historia que entra a `develop`.
 | [Componente MathText](#3-componente-mathtext-scrum-160) | SCRUM-160 | Nicolás Pérez | En `develop` |
 | [Prueba diagnóstica](#4-prueba-diagnóstica-scrum-25) | SCRUM-25 (134–139) | Nicolás Pérez | En `develop` |
 | [Resultado del diagnóstico](#5-resultado-del-diagnóstico-scrum-26) | SCRUM-26 (140–142) | Nicolás Pérez | En `develop` |
+| [Accesibilidad](#7-accesibilidad-scrum-52) | SCRUM-52 | Nicolás Pérez | En `feature/accesibilidad` (falta lo que salga del piloto) |
 | Registro de estudiantes | — (revisión de autenticación) | Jorel Vargas | En `develop` |
 
 ---
@@ -29,7 +30,6 @@ Se actualiza con cada historia que entra a `develop`.
 **Decisiones.**
 
 - **Se quitó «Olvidé mi contraseña»** del prototipo: esa función no está en ninguna tarea y un enlace que no hace nada confunde.
-- **Colores de la alerta de error ajustados solo en esta pantalla:** con el tema actual, las alertas de MUI salen casi blancas. Pendiente corregirlo en `theme/` para todas.
 - **Accesible:** labels visibles, errores enlazados con `aria-describedby`, foco al primer error, alerta con `role="alert"`, uso completo con teclado y diseño a 375 px.
 
 **Pruebas.** `LoginPage.test.jsx`.
@@ -120,8 +120,33 @@ Se actualiza con cada historia que entra a `develop`.
 
 ---
 
+## 7. Accesibilidad (SCRUM-52)
+
+**Para qué.** Cumplir WCAG 2.1 AA en las pantallas principales: **Lighthouse Accessibility ≥ 90** y **todo operable con teclado**. Lo que salga del piloto con usuarios (SCRUM-50) se agrega aquí.
+
+**Cómo se midió.** Lighthouse 12 con sesión real (estudiante y docente), en dos pasadas:
+
+1. Cada pantalla recién cargada: login, registro, inicio del estudiante y del docente, instrucciones y prueba del diagnóstico, práctica y Mi progreso.
+2. Los estados que solo aparecen al interactuar, que Lighthouse no ve al cargar: error del login, registro con errores, retroalimentación de la práctica, resultado del diagnóstico e historial con datos.
+
+Además se recorrió cada pantalla con Tab: orden del foco, foco visible y que no se pierda.
+
+**Resultado.** Antes de los ajustes, 96 en la retroalimentación de la práctica y en el resultado del diagnóstico; 100 en lo demás. Después, **100 en las 13 pantallas y estados**, y el foco visible en todas.
+
+| Hallazgo | Arreglo |
+|---|---|
+| Práctica: al pulsar «Comprobar respuesta» el botón desaparece y el foco caía al inicio de la página | El foco pasa a la retroalimentación; con «Intentar de nuevo» vuelve al enunciado |
+| Práctica y diagnóstico: con la pregunta ya respondida, «Elige una respuesta» y las opciones quedaban en gris 2.7:1 | En el tema, los textos deshabilitados de formularios usan el gris secundario (6.4:1) |
+| Resultado del diagnóstico: el gráfico estaba oculto a lectores de pantalla (`aria-hidden`), pero recharts lo hacía enfocable con Tab | `accessibilityLayer={false}`: la tabla de abajo ya tiene los mismos datos |
+| Las alertas salían casi blancas y no se distinguía su tipo (pendiente desde el login) | En el tema, para todas: fondo claro, borde e icono del color y texto oscuro (≥ 12:1). Se quitó el estilo propio que tenían login y registro |
+
+**Pruebas.** `PracticaPage.test.jsx` verifica que el foco va a la retroalimentación y vuelve al enunciado.
+
+**Falta.** Medir los dashboards (SCRUM-38 y SCRUM-40) cuando existan, y corregir lo que encuentre el piloto. Los scripts de la auditoría están en la carpeta de evidencias (`evidencias/SCRUM-52-accesibilidad/`) para repetirla.
+
+---
+
 ## Pendientes conocidos
 
 - **Dashboard del docente (SCRUM-40):** espera los indicadores de grupo del backend (SCRUM-39).
 - **Historial (SCRUM-41):** espera el registro de intentos de práctica (SCRUM-35).
-- **Alertas del tema:** corregir los colores de `MuiAlert` en `theme/theme.js` para todas las pantallas.

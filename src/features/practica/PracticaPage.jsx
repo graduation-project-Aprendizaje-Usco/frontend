@@ -82,6 +82,7 @@ export default function PracticaPage() {
   const solicitudPendiente = useRef(null);
   const inicioIntento = useRef(0);
   const tituloRef = useRef(null);
+  const resultadoRef = useRef(null);
 
   const solicitarSiguiente = useCallback(async () => {
     const secuencia = ++secuenciaCarga.current;
@@ -145,6 +146,11 @@ export default function PracticaPage() {
     if (ejercicio) tituloRef.current?.focus();
   }, [ejercicio]);
 
+  // El botón "Comprobar respuesta" desaparece al confirmar: sin esto el foco cae al inicio de la página.
+  useEffect(() => {
+    if (resultado) resultadoRef.current?.focus();
+  }, [resultado]);
+
   const validarRespuesta = () => {
     if (!ejercicio) return false;
     if (ejercicio.tipo === 'NUMERICA') return esNumericaValida(respuestaNumerica);
@@ -202,6 +208,7 @@ export default function PracticaPage() {
     setErrorEnvio('');
     solicitudPendiente.current = null;
     inicioIntento.current = Date.now();
+    tituloRef.current?.focus();
   };
 
   const hayRespuesta = validarRespuesta();
@@ -410,6 +417,8 @@ export default function PracticaPage() {
 
               {resultado && (
                 <Alert
+                  ref={resultadoRef}
+                  tabIndex={-1}
                   severity={resultadoCorrecto ? 'success' : 'error'}
                   icon={resultadoCorrecto ? <CheckCircleOutlineOutlined /> : undefined}
                   role="status"
