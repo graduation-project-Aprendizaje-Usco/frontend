@@ -1,10 +1,22 @@
-import PaginaEnConstruccion from '../../components/PaginaEnConstruccion';
+import { useEffect } from 'react';
+import { Stack, Typography } from '@mui/material';
+import HistorialResultados from '../../components/HistorialResultados';
 
+/**
+ * Mi progreso (RF-09, RF-15). Por ahora solo el historial (SCRUM-41); los indicadores
+ * del dashboard de progreso (SCRUM-38) se agregan arriba del historial.
+ */
 export default function ProgresoPage() {
+  useEffect(() => {
+    document.title = 'Mi progreso · Aprendizaje USCO';
+  }, []);
+
   return (
-    <PaginaEnConstruccion
-      titulo="Mi progreso"
-      descripcion="Indicadores de progreso e historial de resultados (RF-09, RF-15)."
-    />
+    <Stack spacing={3} sx={{ maxWidth: 1000 }}>
+      <Typography variant="h4" component="h1">
+        Mi progreso
+      </Typography>
+      <HistorialResultados />
+    </Stack>
   );
 }
