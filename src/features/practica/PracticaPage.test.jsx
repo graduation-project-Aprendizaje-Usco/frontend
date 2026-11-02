@@ -62,6 +62,8 @@ describe('PracticaPage', () => {
     await usuario.click(screen.getByRole('button', { name: 'Comprobar respuesta' }));
 
     await screen.findByText('Respuesta correcta.');
+    expect(screen.getByRole('status')).toHaveTextContent(/Explicación:/);
+    await waitFor(() => expect(screen.getByRole('status')).toHaveFocus());
     expect(responder).toHaveBeenCalledWith(
       expect.objectContaining({
         ejercicioId: 31,
@@ -101,14 +103,11 @@ describe('PracticaPage', () => {
     await elegirOpcion(312);
     await usuario.click(screen.getByRole('button', { name: 'Comprobar respuesta' }));
     expect(await screen.findByText('Respuesta incorrecta.')).toBeInTheDocument();
+    expect(screen.getByRole('status')).toHaveTextContent(/Pista:/);
     expect(screen.getByText(/Omitir el factor/)).toBeInTheDocument();
-    // El botón "Comprobar respuesta" desaparece: el foco va a la retroalimentación, no se pierde.
-    await waitFor(() =>
-      expect(document.activeElement).toHaveTextContent('Respuesta incorrecta.'),
-    );
 
     await usuario.click(screen.getByRole('button', { name: 'Intentar de nuevo' }));
-    expect(document.activeElement).toBe(document.querySelector('h2'));
+    await waitFor(() => expect(document.activeElement).toBe(document.querySelector('h2')));
     await elegirOpcion(311);
     await usuario.click(screen.getByRole('button', { name: 'Comprobar respuesta' }));
     await screen.findByText('Respuesta correcta.');
@@ -119,6 +118,62 @@ describe('PracticaPage', () => {
     );
     expect(siguiente).toHaveBeenCalledTimes(2);
     expect(responder).toHaveBeenCalledTimes(2);
+  });
+
+  it('tras el segundo fallo muestra la explicación completa y ya no permite reintentar', async () => {
+    vi.stubGlobal('crypto', {
+      randomUUID: vi
+        .fn()
+        .mockReturnValueOnce('00000000-0000-4000-8000-000000000011')
+        .mockReturnValueOnce('00000000-0000-4000-8000-000000000012'),
+    });
+    siguiente.mockResolvedValueOnce(ejercicioOpcion());
+    responder
+      .mockResolvedValueOnce(
+        resultadoIntento({
+          esCorrecta: false,
+          puedeReintentar: true,
+          retroalimentacion: {
+            tipo: 'PISTA',
+            texto: 'Revisa la factorización.',
+            errorComun: 'Omitir el factor.',
+          },
+          nivel: { competenciaCodigo: 'ALGEBRAICA', nivel: 1, rachaAciertos: 0, rachaErrores: 1 },
+        }),
+      )
+      .mockResolvedValueOnce(
+        resultadoIntento({
+          numeroIntento: 2,
+          esCorrecta: false,
+          puedeReintentar: false,
+          retroalimentacion: {
+            tipo: 'EXPLICACION',
+            texto: 'La explicación completa del procedimiento.',
+            errorComun: 'Omitir el factor.',
+          },
+          nivel: { competenciaCodigo: 'ALGEBRAICA', nivel: 1, rachaAciertos: 0, rachaErrores: 2 },
+        }),
+      );
+    const usuario = userEvent.setup();
+    renderConApp(<PracticaPage />);
+
+    await esperarEjercicio();
+    await elegirOpcion(312);
+    await usuario.click(screen.getByRole('button', { name: 'Comprobar respuesta' }));
+    expect(await screen.findByRole('status')).toHaveTextContent(/Pista:/);
+
+    await usuario.click(screen.getByRole('button', { name: 'Intentar de nuevo' }));
+    await elegirOpcion(312);
+    await usuario.click(screen.getByRole('button', { name: 'Comprobar respuesta' }));
+
+    expect(await screen.findByRole('status')).toHaveTextContent(/Explicación:/);
+    expect(screen.getByText(/La explicación completa/)).toBeInTheDocument();
+    expect(screen.getByText(/Este fue el último intento/)).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Intentar de nuevo' })).not.toBeInTheDocument();
+    expect(responder).toHaveBeenCalledTimes(2);
+    expect(responder.mock.calls[0][0].claveIdempotencia).not.toBe(
+      responder.mock.calls[1][0].claveIdempotencia,
+    );
   });
 
   it('valida una entrada numérica y solo envía valores numéricos válidos', async () => {
@@ -229,7 +284,7 @@ describe('PracticaPage', () => {
     renderConApp(<PracticaPage />);
 
     await esperarEjercicio();
-    await usuario.click(screen.getByRole('button', { name: 'Pedir una pista' }));
+    await usuario.click(screen.getByRole('button', { name: 'Ver pista' }));
     expect(screen.getByText('Busca el factor común.')).toBeInTheDocument();
     await elegirOpcion(311);
     await usuario.click(screen.getByRole('button', { name: 'Comprobar respuesta' }));

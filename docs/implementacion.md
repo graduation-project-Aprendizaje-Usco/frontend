@@ -11,7 +11,8 @@ Se actualiza con cada historia que entra a `develop`.
 | [Componente MathText](#3-componente-mathtext-scrum-160) | SCRUM-160 | Nicolás Pérez | En `develop` |
 | [Prueba diagnóstica](#4-prueba-diagnóstica-scrum-25) | SCRUM-25 (134–139) | Nicolás Pérez | En `develop` |
 | [Resultado del diagnóstico](#5-resultado-del-diagnóstico-scrum-26) | SCRUM-26 (140–142) | Nicolás Pérez | En `develop` |
-| [Accesibilidad](#7-accesibilidad-scrum-52) | SCRUM-52 | Nicolás Pérez | En `feature/accesibilidad` (falta lo que salga del piloto) |
+| [Práctica adaptativa y retroalimentación](#6-práctica-adaptativa-y-retroalimentación-110-114) | 110, 114 | Juan David Polanco (interfaz base: Fernando Pérez) | En `develop` |
+| [Accesibilidad](#8-accesibilidad-scrum-52) | SCRUM-52 | Nicolás Pérez | En `feature/accesibilidad` (falta lo que salga del piloto) |
 | Registro de estudiantes | — (revisión de autenticación) | Jorel Vargas | En `develop` |
 
 ---
@@ -120,7 +121,31 @@ Se actualiza con cada historia que entra a `develop`.
 
 ---
 
-## 7. Accesibilidad (SCRUM-52)
+## 6. Práctica adaptativa y retroalimentación (110, 114)
+
+**Para qué.** Que el estudiante resuelva ejercicios uno tras otro y reciba, en la misma respuesta del servidor, si acertó y qué hacer para entender el procedimiento. El intento se registra una sola vez aunque el navegador lo reenvíe.
+
+| Archivo | Subtarea | Qué hace |
+|---|---|---|
+| `api/practicaApi.js` | 105 | `siguiente()` y `responder()` contra `/api/practica`; deja pasar el error HTTP para distinguir un 404 de un fallo de red |
+| `PracticaPage.jsx` | 106–108, 113 | Enunciado con MathText, opción múltiple o respuesta numérica, estado de envío, pista antes de responder, reintento del segundo intento y botón para el siguiente ejercicio |
+| `PanelRetroalimentacion.jsx` | 111–112 | Panel bajo el ejercicio con pista o explicación, error común en MathText, `aria-live`, foco al aparecer y aviso de que el segundo fallo fue el último intento |
+
+**Decisiones.**
+
+- **El feedback lo decide el backend.** El frontend no arma textos: muestra `retroalimentacion.tipo`, `texto` y `errorComun` tal como llegan en `POST /api/practica/intentos`.
+- **Pista antes de responder:** el botón «Ver pista» revela la pista del ejercicio y envía `pistaUsada: true` en el intento.
+- **Idempotencia en el navegador:** se genera un UUID al preparar el envío y se conserva si la petición falla; al reintentar se envía la misma clave. Tras una respuesta confirmada se descarta, para que el segundo intento pedagógico use una clave nueva.
+- **Doble clic:** un bloqueo síncrono evita lanzar dos peticiones mientras el backend confirma. El backend también protege la clave de idempotencia ante envíos simultáneos.
+- **Accesibilidad:** el panel usa `role="status"`, `aria-live="polite"` y recibe el foco al aparecer; el resultado no depende solo del color.
+
+**Pruebas.** `PracticaPage.test.jsx` (carga, acierto, primer fallo, segundo fallo sin reintento, respuesta numérica, reintento de red con la misma clave, doble clic, teclado, 404 y pista), `PanelRetroalimentacion.test.jsx` (pista, explicación, acierto y ausencia de feedback) y `practicaApi.test.js` (contrato).
+
+**Cómo probarlo a mano.** Entrar como estudiante, abrir **Práctica**, pedir una pista, responder mal una vez (debe aparecer «Pista»), pulsar «Intentar de nuevo», volver a fallar (debe aparecer «Explicación» y el aviso del último intento) y comprobar que el siguiente ejercicio carga sin recargar.
+
+---
+
+## 8. Accesibilidad (SCRUM-52)
 
 **Para qué.** Cumplir WCAG 2.1 AA en las pantallas principales: **Lighthouse Accessibility ≥ 90** y **todo operable con teclado**. Lo que salga del piloto con usuarios (SCRUM-50) se agrega aquí.
 
@@ -135,12 +160,12 @@ Además se recorrió cada pantalla con Tab: orden del foco, foco visible y que n
 
 | Hallazgo | Arreglo |
 |---|---|
-| Práctica: al pulsar «Comprobar respuesta» el botón desaparece y el foco caía al inicio de la página | El foco pasa a la retroalimentación; con «Intentar de nuevo» vuelve al enunciado |
+| Práctica: al pulsar «Comprobar respuesta» el botón desaparece y el foco caía al inicio de la página | Lo resolvió en paralelo el panel de retroalimentación de Juan David (110, sección 6), con la misma solución: el foco pasa al panel y con «Intentar de nuevo» vuelve al enunciado |
 | Práctica y diagnóstico: con la pregunta ya respondida, «Elige una respuesta» y las opciones quedaban en gris 2.7:1 | En el tema, los textos deshabilitados de formularios usan el gris secundario (6.4:1) |
 | Resultado del diagnóstico: el gráfico estaba oculto a lectores de pantalla (`aria-hidden`), pero recharts lo hacía enfocable con Tab | `accessibilityLayer={false}`: la tabla de abajo ya tiene los mismos datos |
 | Las alertas salían casi blancas y no se distinguía su tipo (pendiente desde el login) | En el tema, para todas: fondo claro, borde e icono del color y texto oscuro (≥ 12:1). Se quitó el estilo propio que tenían login y registro |
 
-**Pruebas.** `PracticaPage.test.jsx` verifica que el foco va a la retroalimentación y vuelve al enunciado.
+**Pruebas.** El foco de la práctica lo verifican `PanelRetroalimentacion.test.jsx` y `PracticaPage.test.jsx` (sección 6).
 
 **Falta.** Medir los dashboards (SCRUM-38 y SCRUM-40) cuando existan, y corregir lo que encuentre el piloto. Los scripts de la auditoría están en la carpeta de evidencias (`evidencias/SCRUM-52-accesibilidad/`) para repetirla.
 

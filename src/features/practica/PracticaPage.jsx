@@ -24,6 +24,7 @@ import { Link } from 'react-router';
 import { responder, siguiente } from '../../api/practicaApi';
 import { mensajeDeError } from '../../api/errores';
 import MathText from '../../components/MathText';
+import PanelRetroalimentacion from './PanelRetroalimentacion';
 
 const ASIGNATURA = 'CALCULO_DIFERENCIAL';
 const NOMBRE_NIVEL = { 1: 'Básico', 2: 'Intermedio', 3: 'Avanzado' };
@@ -82,7 +83,6 @@ export default function PracticaPage() {
   const solicitudPendiente = useRef(null);
   const inicioIntento = useRef(0);
   const tituloRef = useRef(null);
-  const resultadoRef = useRef(null);
 
   const solicitarSiguiente = useCallback(async () => {
     const secuencia = ++secuenciaCarga.current;
@@ -145,11 +145,6 @@ export default function PracticaPage() {
   useEffect(() => {
     if (ejercicio) tituloRef.current?.focus();
   }, [ejercicio]);
-
-  // El botón "Comprobar respuesta" desaparece al confirmar: sin esto el foco cae al inicio de la página.
-  useEffect(() => {
-    if (resultado) resultadoRef.current?.focus();
-  }, [resultado]);
 
   const validarRespuesta = () => {
     if (!ejercicio) return false;
@@ -415,30 +410,7 @@ export default function PracticaPage() {
                 </Alert>
               )}
 
-              {resultado && (
-                <Alert
-                  ref={resultadoRef}
-                  tabIndex={-1}
-                  severity={resultadoCorrecto ? 'success' : 'error'}
-                  icon={resultadoCorrecto ? <CheckCircleOutlineOutlined /> : undefined}
-                  role="status"
-                  aria-live="polite"
-                  sx={{ mt: 2 }}
-                >
-                  <Typography component="p" sx={{ fontWeight: 700 }}>
-                    {resultadoCorrecto ? 'Respuesta correcta.' : 'Respuesta incorrecta.'}
-                  </Typography>
-                  {resultado.retroalimentacion?.texto && (
-                    <MathText texto={resultado.retroalimentacion.texto} component="div" />
-                  )}
-                  {resultado.retroalimentacion?.errorComun && (
-                    <MathText
-                      texto={`Error frecuente: ${resultado.retroalimentacion.errorComun}`}
-                      component="div"
-                    />
-                  )}
-                </Alert>
-              )}
+              <PanelRetroalimentacion resultado={resultado} />
 
               {pistaMostrada && ejercicio.pista && !resultado && (
                 <Alert severity="info" icon={<LightbulbOutlined />} sx={{ mt: 2 }}>
@@ -464,7 +436,7 @@ export default function PracticaPage() {
                   onClick={() => setPistaMostrada(true)}
                   disabled={pistaMostrada || enviando || Boolean(errorEnvio)}
                 >
-                  {pistaMostrada ? 'Pista mostrada' : 'Pedir una pista'}
+                  {pistaMostrada ? 'Pista mostrada' : 'Ver pista'}
                 </Button>
               )}
               {!resultado && (
