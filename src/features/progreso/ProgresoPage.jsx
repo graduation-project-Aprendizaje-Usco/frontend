@@ -16,6 +16,7 @@ import AvisoEvaluacionParcial from './components/AvisoEvaluacionParcial';
 import GraficaDimensiones from './components/GraficaDimensiones';
 import GraficaTendenciaSemanal from './components/GraficaTendenciaSemanal';
 import EstadoSinActividad from './components/EstadoSinActividad';
+import HistorialResultados from '../../components/HistorialResultados';
 
 export default function ProgresoPage() {
   const [progreso, setProgreso] = useState(null);
@@ -27,6 +28,7 @@ export default function ProgresoPage() {
   const montadoRef = useRef(true);
 
   useEffect(() => {
+    document.title = 'Mi progreso · Aprendizaje USCO';
     montadoRef.current = true;
     return () => {
       montadoRef.current = false;
@@ -157,6 +159,9 @@ export default function ProgresoPage() {
           <GraficaTendenciaSemanal tendencia={progreso.tendenciaSemanal || []} />
         </>
       )}
+
+      {/* Historial de resultados (SCRUM-41): solo si hay algo que listar */}
+      {!(sinIntentosPractica && !tieneDiagnosticoRegistrado) && <HistorialResultados />}
     </Stack>
   );
 }

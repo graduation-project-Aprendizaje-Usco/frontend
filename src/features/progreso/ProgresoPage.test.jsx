@@ -9,6 +9,17 @@ vi.mock('../../api/progresoApi', () => ({
   obtenerMiProgreso: vi.fn(),
 }));
 
+// El historial (SCRUM-41) tiene sus propias pruebas; aquí solo debe no llamar al backend.
+vi.mock('../../api/historialApi', () => ({
+  consultar: vi.fn().mockResolvedValue({
+    contenido: [],
+    pagina: 0,
+    tamano: 20,
+    totalElementos: 0,
+    totalPaginas: 0,
+  }),
+}));
+
 // Mock simple de Recharts para que no falle en entorno jsdom con ResponsiveContainer
 vi.mock('recharts', async () => {
   const actual = await vi.importActual('recharts');

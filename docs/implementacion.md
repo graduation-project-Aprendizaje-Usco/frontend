@@ -11,7 +11,8 @@ Se actualiza con cada historia que entra a `develop`.
 | [Componente MathText](#3-componente-mathtext-scrum-160) | SCRUM-160 | Nicolás Pérez | En `develop` |
 | [Prueba diagnóstica](#4-prueba-diagnóstica-scrum-25) | SCRUM-25 (134–139) | Nicolás Pérez | En `develop` |
 | [Resultado del diagnóstico](#5-resultado-del-diagnóstico-scrum-26) | SCRUM-26 (140–142) | Nicolás Pérez | En `develop` |
-| [Práctica adaptativa y retroalimentación](#6-práctica-adaptativa-y-retroalimentación-110-114) | 110, 114 | Juan David Polanco (interfaz base: Fernando Pérez) | En esta rama |
+| [Práctica adaptativa y retroalimentación](#6-práctica-adaptativa-y-retroalimentación-110-114) | 110, 114 | Juan David Polanco (interfaz base: Fernando Pérez) | En `develop` |
+| [Historial de resultados](#7-historial-de-resultados-scrum-41) | SCRUM-41 (169) | Nicolás Pérez | En `feature/historial` |
 | Registro de estudiantes | — (revisión de autenticación) | Jorel Vargas | En `develop` |
 
 ---
@@ -145,8 +146,39 @@ Se actualiza con cada historia que entra a `develop`.
 
 ---
 
+## 7. Historial de resultados (SCRUM-41)
+
+**Para qué.** Que el estudiante vea en **Mi progreso** todo lo que ha hecho (diagnóstico y ejercicios de práctica), y que el docente pueda ver el de un estudiante de sus grupos.
+
+| Archivo | Qué hace |
+|---|---|
+| `api/historialApi.js` | `consultar(filtros)` contra `GET /api/historial`; no envía los filtros vacíos |
+| `components/HistorialResultados.jsx` | Filtros (actividad, competencia, desde, hasta), tabla y paginación de 20 en 20 |
+| `features/progreso/ProgresoPage.jsx` | Muestra el historial del estudiante en `/estudiante/progreso` |
+
+**Reutilizable** (por eso está en `components/`):
+
+```jsx
+<HistorialResultados />                    // estudiante: su propio historial
+<HistorialResultados estudianteId={id} />  // docente: un estudiante de sus grupos
+```
+
+**Qué muestra cada fila:** fecha, tipo y actividad, competencia y resultado. En el diagnóstico, «16 de 24 · Riesgo moderado»; en la práctica, «Correcto» o «Incorrecto» con icono y texto (nunca solo color), y debajo el nivel, el tiempo y si usó pista.
+
+**Decisiones.**
+
+- Al cambiar un filtro se vuelve a la primera página.
+- Sin resultados se dice «No hay actividades con estos filtros» en vez de mostrar una tabla vacía; el conteo se anuncia con `aria-live`.
+- Los filtros se reparten en las filas que hagan falta, y la tabla se desplaza dentro de su recuadro en celular.
+- **Mi progreso** de momento solo tiene el historial: los indicadores del dashboard de progreso (SCRUM-38, Fernando) van arriba de él.
+
+**Pruebas.** `HistorialResultados.test.jsx`: 6 pruebas (filas de ambos tipos, filtros, paginación, estado vacío, docente con `estudianteId`, error del backend).
+
+**Cómo probarlo a mano.** Con un estudiante que haya presentado el diagnóstico y resuelto ejercicios en **Práctica**, entrar a **Mi progreso** y probar los filtros.
+
+---
+
 ## Pendientes conocidos
 
-- **Dashboard del docente (SCRUM-40):** espera los indicadores de grupo del backend (SCRUM-39).
-- **Historial (SCRUM-41):** espera el registro de intentos de práctica (SCRUM-35).
+- **Dashboard del docente (SCRUM-40):** espera los indicadores de grupo del backend (SCRUM-39). Cuando exista el detalle del estudiante, reutilizará `<HistorialResultados estudianteId={id} />`.
 - **Alertas del tema:** corregir los colores de `MuiAlert` en `theme/theme.js` para todas las pantallas.
