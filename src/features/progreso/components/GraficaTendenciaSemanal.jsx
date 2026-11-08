@@ -106,7 +106,7 @@ export default function GraficaTendenciaSemanal({ tendencia = [] }) {
       {/* Contenedor Recharts */}
       <Box aria-hidden="true" sx={{ height: 280, width: '100%', my: 2 }}>
         <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={datosGrafica} margin={{ top: 20, right: 30, bottom: 10, left: 0 }}>
+          <LineChart data={datosGrafica} margin={{ top: 20, right: 30, bottom: 10, left: 0 }} accessibilityLayer={false}>
             <CartesianGrid strokeDasharray="3 3" stroke={theme.palette.divider} vertical={false} />
             <XAxis
               dataKey="etiqueta"

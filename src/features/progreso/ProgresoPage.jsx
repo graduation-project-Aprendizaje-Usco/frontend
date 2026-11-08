@@ -53,6 +53,8 @@ export default function ProgresoPage() {
   }, []);
 
   useEffect(() => {
+    // Al montar, cargando ya es true; el resto del estado cambia después de la respuesta HTTP.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     cargarProgreso();
   }, [cargarProgreso]);
 

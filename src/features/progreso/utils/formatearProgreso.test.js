@@ -4,7 +4,6 @@ import {
   formatearNivel,
   formatearPorcentaje,
   formatearPuntosPorcentuales,
-  NIVEL_ETIQUETAS,
 } from './formatearProgreso';
 
 describe('formatearProgreso utils', () => {

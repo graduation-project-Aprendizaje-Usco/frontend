@@ -50,7 +50,7 @@ export default function GraficaDimensiones({ dimensiones = [] }) {
       {/* Contenedor Recharts accesible (oculto a lectores de pantalla) */}
       <Box aria-hidden="true" sx={{ height: Math.max(180, 70 * dimensiones.length + 30), width: '100%', my: 2 }}>
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={datosGrafica} layout="vertical" margin={{ top: 10, right: 60, bottom: 10, left: 20 }}>
+          <BarChart data={datosGrafica} layout="vertical" margin={{ top: 10, right: 60, bottom: 10, left: 20 }} accessibilityLayer={false}>
             <XAxis type="number" domain={[0, 100]} tick={{ fill: theme.palette.text.secondary, fontSize: 12 }} />
             <YAxis
               type="category"
