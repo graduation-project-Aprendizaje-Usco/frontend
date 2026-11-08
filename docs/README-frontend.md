@@ -50,6 +50,8 @@ Abre http://localhost:5173.
 
 Antes de abrir un PR: `npm run lint`, `npm test` y `npm run build` sin errores (es lo mismo que corre CI).
 
+Verificación registrada el **4 de noviembre de 2026**: `npm test` pasó **81 pruebas en 11 archivos** y `npm run build` generó el build de producción correctamente.
+
 ### Pruebas
 
 - Archivos `*.test.jsx` junto al componente que prueban (`LoginPage.jsx` → `LoginPage.test.jsx`).
@@ -82,7 +84,7 @@ src/
 │   ├── auth/         login, registro, reglas del registro (reglasRegistro.js)
 │   ├── diagnostico/  prueba de 24 ítems, resultado
 │   ├── practica/     ejercicios, retroalimentación
-│   ├── progreso/     dashboard e historial del estudiante
+│   ├── progreso/     dashboard de indicadores de progreso del estudiante
 │   ├── docente/      dashboard docente, gestión de actividades
 │   └── admin/        usuarios y roles
 ├── components/       reutilizables: MathText, BarraProgreso, Temporizador…
@@ -106,7 +108,7 @@ Reglas:
 | `/estudiante` | ESTUDIANTE | Inicio del estudiante | En construcción |
 | `/estudiante/diagnostico` | ESTUDIANTE | Prueba diagnóstica y resultado | Lista |
 | `/estudiante/practica` | ESTUDIANTE | Ejercicios adaptativos | Lista |
-| `/estudiante/progreso` | ESTUDIANTE | Historial de resultados; luego el dashboard de progreso (SCRUM-38) | Historial en PR (`feature/historial`) |
+| `/estudiante/progreso` | ESTUDIANTE | Dashboard Mi progreso | Lista |
 | `/docente` | DOCENTE | Dashboard de desempeño del grupo (SCRUM-40) | En construcción |
 | `/docente/estudiantes` | DOCENTE | Estudiantes y su detalle | En construcción |
 | `/docente/actividades` | DOCENTE | Gestión de actividades y contenidos | En construcción |
@@ -115,6 +117,35 @@ Reglas:
 | `/no-autorizado` | cualquiera | Acceso denegado | Lista |
 
 «En construcción»: la ruta y el menú existen, pero la pantalla todavía muestra `PaginaEnConstruccion`.
+
+### Mi progreso del estudiante
+
+La ruta `/estudiante/progreso` está protegida para `ESTUDIANTE`, se carga dentro de `EstudianteLayout` y aparece como **Mi progreso** en el menú definido en `src/routes/navegacion.js`. La pantalla está implementada en `src/features/progreso/ProgresoPage.jsx`; usa `src/api/progresoApi.js` para llamar `GET /api/progreso/me` del backend.
+
+La API del módulo llama al cliente Axios compartido `src/api/client.js`: la URL base sale de `VITE_API_URL`, el interceptor adjunta el token almacenado y la respuesta 401 sigue el flujo compartido de expiración de sesión. Los componentes no crean clientes HTTP propios ni calculan indicadores con cifras simuladas.
+
+Componentes principales de `src/features/progreso/`:
+
+| Componente | Función |
+|---|---|
+| `ProgresoPage.jsx` | Carga los datos, maneja carga/error/reintento y elige la vista según la actividad y el diagnóstico |
+| `components/ResumenKpis.jsx` | Nivel general, porcentaje general, ejercicios completados e intentos |
+| `components/AvisoEvaluacionParcial.jsx` | Explica el umbral de consolidación y qué dimensiones siguen pendientes |
+| `components/GraficaDimensiones.jsx` | Gráfica de barras Recharts y tabla semántica con aciertos, porcentaje, nivel, diagnóstico y variación |
+| `components/GraficaTendenciaSemanal.jsx` | Gráfica de línea Recharts y tabla accesible de resultados por semana |
+| `components/EstadoSinActividad.jsx` | Estado inicial sin diagnóstico ni intentos de práctica, con acceso a practicar |
+| `utils/formatearProgreso.js` | Etiquetas y formateo de niveles, porcentajes y variaciones sin convertir valores nulos en cero |
+
+#### Escenarios que muestra el dashboard
+
+- **Cargando:** presenta el indicador de carga mientras se consulta el backend.
+- **Error:** muestra el mensaje de la API cuando está disponible y un botón **Reintentar**; el reintento vuelve a consultar el endpoint.
+- **Sin diagnóstico y sin intentos de práctica:** muestra un estado neutral, no representa la ausencia de datos como 0 % de rendimiento y ofrece ir a Práctica.
+- **Diagnóstico registrado, pero sin práctica:** muestra el aviso de diagnóstico inicial, los resultados por dimensión y los KPI. Los porcentajes de práctica no evaluados quedan como “Sin evaluar”; ofrece comenzar la práctica.
+- **Con intentos de práctica:** presenta los KPI, el rendimiento por dimensión y la tendencia semanal. Si la respuesta marca `evaluacionParcial`, informa qué dimensiones todavía no alcanzan tres intentos evaluados.
+- **Sin semanas con actividad:** la sección de tendencia muestra un estado informativo y un acceso a Práctica, sin inventar semanas vacías. Con una sola semana, el gráfico informa que la comparación temporal se verá al acumular actividad posterior.
+
+Los gráficos Recharts están contenidos en `ResponsiveContainer`; cada uno tiene una tabla semántica equivalente para consultar los mismos datos de forma accesible. Las tablas etiquetan sus encabezados y dimensiones. MUI adapta las tarjetas KPI a una columna en pantallas pequeñas, dos en `sm` y cuatro en `md`; los gráficos ocupan el ancho disponible. Los valores nulos se muestran como pendientes/sin evaluar y nunca como 0 %.
 
 `ProtectedRoute` redirige a `/login` si no hay sesión y a `/no-autorizado` si el rol no corresponde. El backend vuelve a validar el rol en cada petición: la protección del frontend es solo de navegación.
 
