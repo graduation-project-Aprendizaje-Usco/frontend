@@ -98,18 +98,7 @@ export default function LoginPage() {
         )}
 
         {errorServidor && (
-          // Colores del prototipo 02 (fondo rosado, texto rojo): contraste 6.1:1.
-          <Alert
-            severity="error"
-            role="alert"
-            sx={{
-              bgcolor: 'error.light',
-              color: 'error.main',
-              border: 1,
-              borderColor: 'error.main',
-              '& .MuiAlert-icon': { color: 'error.main' },
-            }}
-          >
+          <Alert severity="error" role="alert">
             {errorServidor}
           </Alert>
         )}

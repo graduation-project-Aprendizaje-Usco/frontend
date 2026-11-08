@@ -12,7 +12,8 @@ Se actualiza con cada historia que entra a `develop`.
 | [Prueba diagnóstica](#4-prueba-diagnóstica-scrum-25) | SCRUM-25 (134–139) | Nicolás Pérez | En `develop` |
 | [Resultado del diagnóstico](#5-resultado-del-diagnóstico-scrum-26) | SCRUM-26 (140–142) | Nicolás Pérez | En `develop` |
 | [Práctica adaptativa y retroalimentación](#6-práctica-adaptativa-y-retroalimentación-110-114) | 110, 114 | Juan David Polanco (interfaz base: Fernando Pérez) | En `develop` |
-| [Historial de resultados](#7-historial-de-resultados-scrum-41) | SCRUM-41 (169) | Nicolás Pérez | En `feature/historial` |
+| [Historial de resultados](#7-historial-de-resultados-scrum-41) | SCRUM-41 (169) | Nicolás Pérez | En `develop` |
+| [Accesibilidad](#8-accesibilidad-scrum-52) | SCRUM-52 | Nicolás Pérez | En `develop` (falta lo que salga del piloto) |
 | Registro de estudiantes | — (revisión de autenticación) | Jorel Vargas | En `develop` |
 
 ---
@@ -31,7 +32,6 @@ Se actualiza con cada historia que entra a `develop`.
 **Decisiones.**
 
 - **Se quitó «Olvidé mi contraseña»** del prototipo: esa función no está en ninguna tarea y un enlace que no hace nada confunde.
-- **Colores de la alerta de error ajustados solo en esta pantalla:** con el tema actual, las alertas de MUI salen casi blancas. Pendiente corregirlo en `theme/` para todas.
 - **Accesible:** labels visibles, errores enlazados con `aria-describedby`, foco al primer error, alerta con `role="alert"`, uso completo con teclado y diseño a 375 px.
 
 **Pruebas.** `LoginPage.test.jsx`.
@@ -170,7 +170,7 @@ Se actualiza con cada historia que entra a `develop`.
 - Al cambiar un filtro se vuelve a la primera página.
 - Sin resultados se dice «No hay actividades con estos filtros» en vez de mostrar una tabla vacía; el conteo se anuncia con `aria-live`.
 - Los filtros se reparten en las filas que hagan falta, y la tabla se desplaza dentro de su recuadro en celular.
-- **Mi progreso** de momento solo tiene el historial: los indicadores del dashboard de progreso (SCRUM-38, Fernando) van arriba de él.
+- En **Mi progreso** el historial va debajo del dashboard de progreso (SCRUM-38, Fernando). No se muestra si el estudiante aún no tiene diagnóstico ni práctica, porque la página ya muestra el estado sin actividad.
 
 **Pruebas.** `HistorialResultados.test.jsx`: 6 pruebas (filas de ambos tipos, filtros, paginación, estado vacío, docente con `estudianteId`, error del backend).
 
@@ -178,7 +178,34 @@ Se actualiza con cada historia que entra a `develop`.
 
 ---
 
+## 8. Accesibilidad (SCRUM-52)
+
+**Para qué.** Cumplir WCAG 2.1 AA en las pantallas principales: **Lighthouse Accessibility ≥ 90** y **todo operable con teclado**. Lo que salga del piloto con usuarios (SCRUM-50) se agrega aquí.
+
+**Cómo se midió.** Lighthouse 12 con sesión real (estudiante y docente), en dos pasadas:
+
+1. Cada pantalla recién cargada: login, registro, inicio del estudiante y del docente, instrucciones y prueba del diagnóstico, práctica y Mi progreso.
+2. Los estados que solo aparecen al interactuar, que Lighthouse no ve al cargar: error del login, registro con errores, retroalimentación de la práctica, resultado del diagnóstico e historial con datos.
+
+Además se recorrió cada pantalla con Tab: orden del foco, foco visible y que no se pierda.
+
+**Resultado.** Antes de los ajustes, 96 en la retroalimentación de la práctica y en el resultado del diagnóstico; 100 en lo demás. Después, **100 en las 13 pantallas y estados**, y el foco visible en todas.
+
+| Hallazgo | Arreglo |
+|---|---|
+| Práctica: al pulsar «Comprobar respuesta» el botón desaparece y el foco caía al inicio de la página | Lo resolvió en paralelo el panel de retroalimentación de Juan David (110, sección 6), con la misma solución: el foco pasa al panel y con «Intentar de nuevo» vuelve al enunciado |
+| Práctica y diagnóstico: con la pregunta ya respondida, «Elige una respuesta» y las opciones quedaban en gris 2.7:1 | En el tema, los textos deshabilitados de formularios usan el gris secundario (6.4:1) |
+| Resultado del diagnóstico: el gráfico estaba oculto a lectores de pantalla (`aria-hidden`), pero recharts lo hacía enfocable con Tab | `accessibilityLayer={false}`: la tabla de abajo ya tiene los mismos datos |
+| Las alertas salían casi blancas y no se distinguía su tipo (pendiente desde el login) | En el tema, para todas: fondo claro, borde e icono del color y texto oscuro (≥ 12:1). Se quitó el estilo propio que tenían login y registro |
+
+**Pruebas.** El foco de la práctica lo verifican `PanelRetroalimentacion.test.jsx` y `PracticaPage.test.jsx` (sección 6).
+
+**Dashboard de progreso (SCRUM-38).** Se midió al integrarlo: 95, porque sus dos gráficas ocultas recibían el foco con Tab. Con el mismo arreglo (`accessibilityLayer={false}`) quedó en **100**.
+
+**Falta.** Medir el dashboard del docente (SCRUM-40) cuando exista, y corregir lo que encuentre el piloto. Los scripts de la auditoría están en la carpeta de evidencias (`evidencias/SCRUM-52-accesibilidad/`) para repetirla.
+
+---
+
 ## Pendientes conocidos
 
 - **Dashboard del docente (SCRUM-40):** espera los indicadores de grupo del backend (SCRUM-39). Cuando exista el detalle del estudiante, reutilizará `<HistorialResultados estudianteId={id} />`.
-- **Alertas del tema:** corregir los colores de `MuiAlert` en `theme/theme.js` para todas las pantallas.

@@ -108,6 +108,8 @@ export default function ResultadoDiagnostico({ resultado }) {
               data={resultado.dimensiones}
               layout="vertical"
               margin={{ top: 0, right: 48, bottom: 0, left: 0 }}
+              // Sin esto recharts hace el gráfico enfocable con Tab, pero está oculto (aria-hidden).
+              accessibilityLayer={false}
             >
               <XAxis type="number" domain={[0, 100]} hide />
               <YAxis

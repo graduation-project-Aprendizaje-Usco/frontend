@@ -105,6 +105,28 @@ let theme = createTheme({
     MuiPaper: { styleOverrides: { outlined: { borderColor: usco.gris[100] } } },
     MuiCard: { defaultProps: { variant: 'outlined' } },
     MuiTextField: { defaultProps: { fullWidth: true } },
+    // Con los "light" pálidos de la paleta, MUI pinta las alertas casi blancas y no se distingue
+    // su tipo. Fondo claro + borde e icono del color, texto oscuro (≥ 12:1 en las cuatro).
+    MuiAlert: {
+      styleOverrides: {
+        root: ({ theme: t, ownerState }) => {
+          if (ownerState.variant !== 'standard') return {};
+          const color = t.palette[ownerState.color || ownerState.severity || 'success'];
+          return {
+            backgroundColor: color.light,
+            color: t.palette.text.primary,
+            border: `1px solid ${color.main}`,
+            '& .MuiAlert-icon': { color: color.main },
+          };
+        },
+      },
+    },
+    // Las opciones de una pregunta ya respondida quedan deshabilitadas, pero el estudiante
+    // las sigue leyendo: el gris por defecto (2.7:1) no cumple 4.5:1.
+    MuiFormLabel: { styleOverrides: { root: { '&.Mui-disabled': { color: usco.gris.main } } } },
+    MuiFormControlLabel: {
+      styleOverrides: { label: { '&.Mui-disabled': { color: usco.gris.main } } },
+    },
   },
 });
 

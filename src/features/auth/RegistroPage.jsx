@@ -160,17 +160,7 @@ export default function RegistroPage() {
         </Stack>
 
         {errorServidor && (
-          <Alert
-            severity="error"
-            role="alert"
-            sx={{
-              bgcolor: 'error.light',
-              color: 'error.main',
-              border: 1,
-              borderColor: 'error.main',
-              '& .MuiAlert-icon': { color: 'error.main' },
-            }}
-          >
+          <Alert severity="error" role="alert">
             {errorServidor}
           </Alert>
         )}
