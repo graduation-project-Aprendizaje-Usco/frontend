@@ -109,7 +109,7 @@ Reglas:
 | `/estudiante/diagnostico` | ESTUDIANTE | Prueba diagnóstica y resultado | Lista |
 | `/estudiante/practica` | ESTUDIANTE | Ejercicios adaptativos | Lista |
 | `/estudiante/progreso` | ESTUDIANTE | Dashboard Mi progreso | Lista |
-| `/docente` | DOCENTE | Dashboard de desempeño del grupo (SCRUM-40) | En construcción |
+| `/docente` | DOCENTE | Dashboard de desempeño del grupo (SCRUM-40); el detalle del estudiante abre en un Drawer | Lista |
 | `/docente/estudiantes` | DOCENTE | Estudiantes y su detalle | En construcción |
 | `/docente/actividades` | DOCENTE | Gestión de actividades y contenidos | En construcción |
 | `/docente/reportes` | DOCENTE | Reportes | En construcción |
