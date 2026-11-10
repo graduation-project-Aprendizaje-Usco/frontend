@@ -190,6 +190,8 @@ describe('PracticaPage', () => {
 
     await esperarEjercicio();
     const campo = screen.getByLabelText('Respuesta numérica');
+    // MUI 9 ignora inputProps: el teclado numérico del celular depende de slotProps.htmlInput.
+    expect(campo).toHaveAttribute('inputmode', 'decimal');
     const comprobar = screen.getByRole('button', { name: 'Comprobar respuesta' });
     expect(comprobar).toBeDisabled();
     await usuario.type(campo, 'no es número');

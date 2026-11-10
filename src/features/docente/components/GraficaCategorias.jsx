@@ -57,6 +57,8 @@ export default function GraficaCategorias({ distribucion = [] }) {
                 outerRadius={75}
                 label={({ nombre, cantidad }) => `${nombre}: ${cantidad}`}
                 isAnimationActive={false}
+                // El Pie de recharts es enfocable por defecto aunque la gráfica esté oculta (aria-hidden).
+                rootTabIndex={-1}
               >
                 {datos.map((fila) => (
                   <Cell key={fila.categoria} fill={colorCategoria(theme, fila.categoria)} />

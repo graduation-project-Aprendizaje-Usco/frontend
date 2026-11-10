@@ -240,7 +240,7 @@ export default function EjercicioFormDialog({ ejercicio, contenidos, onCerrar, o
 
             {esMultiple ? (
               <Stack spacing={1}>
-                <Typography variant="subtitle2">Opciones (marca una correcta)</Typography>
+                <Typography variant="subtitle2" component="h3">Opciones (marca una correcta)</Typography>
                 {LETRAS.map((letra, indice) => (
                   <Stack key={letra} direction={{ xs: 'column', sm: 'row' }} spacing={1}>
                     <TextField
@@ -260,7 +260,7 @@ export default function EjercicioFormDialog({ ejercicio, contenidos, onCerrar, o
                 <TextField
                   label="Respuesta numérica"
                   type="number"
-                  inputProps={{ step: 'any' }}
+                  slotProps={{ htmlInput: { step: 'any' } }}
                   {...register('respuestaNumerica')}
                   error={Boolean(errors.respuestaNumerica)}
                   helperText={errors.respuestaNumerica?.message}
@@ -269,7 +269,7 @@ export default function EjercicioFormDialog({ ejercicio, contenidos, onCerrar, o
                 <TextField
                   label="Tolerancia"
                   type="number"
-                  inputProps={{ step: 'any', min: 0 }}
+                  slotProps={{ htmlInput: { step: 'any', min: 0 } }}
                   {...register('tolerancia')}
                   error={Boolean(errors.tolerancia)}
                   helperText={errors.tolerancia?.message}

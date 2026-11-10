@@ -394,7 +394,9 @@ export default function PracticaPage() {
                   value={respuestaNumerica}
                   onChange={(evento) => setRespuestaNumerica(evento.target.value)}
                   disabled={Boolean(resultado) || enviando || Boolean(errorEnvio)}
-                  inputProps={{ inputMode: 'decimal', 'aria-describedby': 'ayuda-respuesta-numerica' }}
+                  slotProps={{
+                    htmlInput: { inputMode: 'decimal', 'aria-describedby': 'ayuda-respuesta-numerica' },
+                  }}
                   helperText={
                     <span id="ayuda-respuesta-numerica">
                       Escribe un número; puedes usar coma o punto decimal.
