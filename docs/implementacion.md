@@ -14,6 +14,8 @@ Se actualiza con cada historia que entra a `develop`.
 | [Práctica adaptativa y retroalimentación](#6-práctica-adaptativa-y-retroalimentación-110-114) | 110, 114 | Juan David Polanco (interfaz base: Fernando Pérez) | En `develop` |
 | [Historial de resultados](#7-historial-de-resultados-scrum-41) | SCRUM-41 (169) | Nicolás Pérez | En `develop` |
 | [Accesibilidad](#8-accesibilidad-scrum-52) | SCRUM-52 | Nicolás Pérez | En `develop` (falta lo que salga del piloto) |
+| [Dashboard del docente](#9-dashboard-del-docente-scrum-40) | SCRUM-40 (124) | Nicolás Pérez (implementación: Juan David Polanco) | En esta rama |
+| [Actividades y contenidos](#10-actividades-y-contenidos-scrum-39) | SCRUM-39 (132) | Juan David Polanco | En esta rama |
 | Registro de estudiantes | — (revisión de autenticación) | Jorel Vargas | En `develop` |
 
 ---
@@ -206,6 +208,75 @@ Además se recorrió cada pantalla con Tab: orden del foco, foco visible y que n
 
 ---
 
+## 9. Dashboard del docente (SCRUM-40)
+
+**Para qué.** Que el docente consulte el desempeño de sus grupos, identifique estudiantes en riesgo y revise el detalle y el historial de cada estudiante.
+
+| Archivo | Qué hace |
+|---|---|
+| `api/gruposApi.js` | `listar()`, `crear()` e `inscribir()` contra `/api/grupos` |
+| `api/analiticaApi.js` | `obtenerResumenGrupo()` y `obtenerDetalleEstudiante()` contra `/api/analitica/grupos` |
+| `features/docente/InicioDocentePage.jsx` | Dashboard: selector de grupo, filtros, resumen, riesgo, tabla y diálogos |
+| `features/docente/components/SelectorGrupo.jsx` | Selector de los grupos del docente |
+| `features/docente/components/FiltrosGrupo.jsx` | Competencia y rango de fechas (“Periodo desde/hasta”) |
+| `features/docente/components/ResumenKpisGrupo.jsx` | Estudiantes, actividad, promedio general y estudiantes en riesgo |
+| `features/docente/components/GraficaDimensionesGrupo.jsx` | Barras por dimensión y tabla accesible equivalente |
+| `features/docente/components/GraficaCategorias.jsx` | Distribución de categorías con tabla accesible |
+| `features/docente/components/DimensionMasDebil.jsx` | Dimensión con menor promedio del grupo |
+| `features/docente/components/GraficaEvolucionGeneral.jsx` | Evolución semanal con tabla accesible |
+| `features/docente/components/TablaEjerciciosErrores.jsx` | Top 5 de ejercicios con más errores |
+| `features/docente/components/TablaEstudiantes.jsx` | Tabla ordenable, búsqueda y acceso al detalle |
+| `features/docente/components/DetalleEstudianteDrawer.jsx` | Detalle del estudiante e historial reutilizado |
+| `features/docente/components/CrearGrupoDialog.jsx` | Crear grupo cuando no existe |
+| `features/docente/components/InscribirEstudianteDialog.jsx` | Inscribir estudiante por correo |
+
+**Decisiones.**
+
+- **Periodo como rango de fechas:** no se agregó `grupo.periodo`; el backend filtra los intentos con `desde`/`hasta`.
+- **Riesgo:** último diagnóstico `ALTO_RIESGO` o promedio de práctica menor al 50 %; la falta de actividad se muestra aparte.
+- **Detalle en Drawer:** evita duplicar la tabla y reutiliza `<HistorialResultados estudianteId={id} />` de SCRUM-41.
+- **Filtros en la URL:** `grupo`, `competencia`, `desde`, `hasta` y `estudiante` se sincronizan con `useSearchParams`.
+- **Crear e inscribir desde el dashboard:** el backend ya estaba listo, así que el flujo queda completo sin salir de la pantalla.
+- **Accesibilidad:** tablas con encabezados, gráficos ocultos a lectores de pantalla con tabla equivalente, foco visible y controles con etiqueta.
+
+**Pruebas.** `InicioDocentePage.test.jsx` (6 pruebas: resumen, detalle, filtros, crear grupo, inscribir y error), `gruposApi.test.js` y `analiticaApi.test.js`. Resultado: **106 pruebas** en total, `npm run lint` y `npm run build` sin errores.
+
+**Cómo probarlo a mano.** Entrar como `docente@aprendizaje.test` / `Docente2026*`, crear o seleccionar un grupo, inscribir estudiantes, cambiar competencia y fechas, ordenar la tabla y abrir “Ver detalle”.
+
+El dashboard incluye ahora los indicadores derivados: dimensión más débil, top 5 de ejercicios con más errores y evolución semanal del grupo.
+
+---
+
+## 10. Actividades y contenidos (SCRUM-39)
+
+**Para qué.** Que el docente cree, edite, active/desactive y elimine sus contenidos y ejercicios de práctica.
+
+| Archivo | Qué hace |
+|---|---|
+| `api/contenidosApi.js` | Listar, crear, actualizar, cambiar estado y eliminar contenidos |
+| `api/ejerciciosApi.js` | Listar, crear, actualizar, cambiar estado y eliminar ejercicios |
+| `features/docente/ActividadesPage.jsx` | Pantalla con pestañas de ejercicios y contenidos |
+| `features/docente/actividades/ContenidosTab.jsx` | Filtros y tabla de contenidos |
+| `features/docente/actividades/EjerciciosTab.jsx` | Filtros y tabla de ejercicios |
+| `features/docente/actividades/ContenidoFormDialog.jsx` | Formulario de contenido |
+| `features/docente/actividades/EjercicioFormDialog.jsx` | Formulario de ejercicio con vista previa y validación |
+| `features/docente/actividades/ConfirmarEliminacionDialog.jsx` | Confirmación y opción de desactivar si hay dependencias |
+
+**Decisiones.**
+
+- **Formularios con `react-hook-form` + `zod`**, con validación de cuatro opciones y una única correcta.
+- **Vista previa MathText** del enunciado y las opciones mientras se edita.
+- **Confirmación de borrado:** si el backend responde 409, el diálogo muestra el motivo y ofrece “Desactivar en su lugar”.
+- **Contenido y competencia inmutables** después de crear el ejercicio; el código solo se puede definir al crear.
+- **El motor respeta `activo`:** las pruebas de backend verifican que un ejercicio desactivado deja de aparecer.
+
+**Pruebas.** `ActividadesPage.test.jsx` (6 pruebas: pestañas, crear contenido, crear ejercicio, editar, activar/eliminar y desactivar tras 409) y `actividadesApi.test.js` (clientes de contenidos y ejercicios).
+
+**Cómo probarlo a mano.** Entrar como docente, abrir `/docente/actividades`, crear un contenido, crear un ejercicio, iniciar sesión como estudiante y comprobar que aparece en Práctica. Luego desactivarlo y verificar que desaparece.
+
+---
+
 ## Pendientes conocidos
 
-- **Dashboard del docente (SCRUM-40):** espera los indicadores de grupo del backend (SCRUM-39). Cuando exista el detalle del estudiante, reutilizará `<HistorialResultados estudianteId={id} />`.
+- **Accesibilidad del dashboard docente:** medirlo con Lighthouse cuando la rama esté en staging y corregir los hallazgos del piloto.
+- **Reportes del docente:** sigue en construcción (`/docente/reportes`).
