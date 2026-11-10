@@ -30,6 +30,8 @@ const ReportesPage = lazy(() => import('../features/docente/ReportesPage'));
 const InicioAdminPage = lazy(() => import('../features/admin/InicioAdminPage'));
 const UsuariosPage = lazy(() => import('../features/admin/UsuariosPage'));
 const RolesPage = lazy(() => import('../features/admin/RolesPage'));
+const GruposAdminPage = lazy(() => import('../features/admin/GruposAdminPage'));
+const ActividadesAdminPage = lazy(() => import('../features/admin/ActividadesAdminPage'));
 
 // Páginas de prueba de componentes: solo con `npm run dev`. En el build,
 // import.meta.env.DEV es false y Vite ni siquiera incluye estos archivos.
@@ -79,6 +81,8 @@ export default function AppRouter() {
           <Route path="/admin" element={<AdminLayout />}>
             <Route index element={<InicioAdminPage />} />
             <Route path="usuarios" element={<UsuariosPage />} />
+            <Route path="grupos" element={<GruposAdminPage />} />
+            <Route path="actividades" element={<ActividadesAdminPage />} />
             <Route path="roles" element={<RolesPage />} />
           </Route>
         </Route>

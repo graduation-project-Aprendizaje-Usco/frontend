@@ -84,19 +84,39 @@ export default function InicioAdminPage() {
             </Tarjeta>
           );
         })}
-        <Tarjeta titulo="Grupos" valor={resumen.grupos} detalle="Grupos creados por los docentes" icono={ClassOutlined} />
+        <Tarjeta titulo="Grupos" valor={resumen.grupos} detalle="Grupos creados por los docentes" icono={ClassOutlined}>
+          <Link component={RouterLink} to="/admin/grupos" sx={{ display: 'inline-block', mt: 1 }}>
+            Ver grupos
+          </Link>
+        </Tarjeta>
         <Tarjeta
           titulo="Contenidos activos"
           valor={resumen.contenidosActivos}
           detalle="Disponibles para la práctica"
           icono={MenuBookOutlined}
-        />
+        >
+          <Link
+            component={RouterLink}
+            to="/admin/actividades?tab=contenidos"
+            sx={{ display: 'inline-block', mt: 1 }}
+          >
+            Ver contenidos
+          </Link>
+        </Tarjeta>
         <Tarjeta
           titulo="Ejercicios activos"
           valor={resumen.ejerciciosActivos}
           detalle="Los que el motor puede asignar"
           icono={AssignmentOutlined}
-        />
+        >
+          <Link
+            component={RouterLink}
+            to="/admin/actividades?tab=ejercicios"
+            sx={{ display: 'inline-block', mt: 1 }}
+          >
+            Ver ejercicios
+          </Link>
+        </Tarjeta>
       </Box>
     </Stack>
   );

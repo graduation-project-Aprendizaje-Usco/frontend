@@ -17,3 +17,9 @@ export async function inscribir(grupoId, correo) {
   const { data } = await api.post(`/grupos/${grupoId}/estudiantes`, { correo });
   return data;
 }
+
+/** GET /api/grupos/{id}/estudiantes — solo DOCENTE del grupo o ADMIN. */
+export async function estudiantes(grupoId) {
+  const { data } = await api.get(`/grupos/${grupoId}/estudiantes`);
+  return data;
+}
