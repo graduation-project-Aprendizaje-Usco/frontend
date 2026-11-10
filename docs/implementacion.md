@@ -14,8 +14,8 @@ Se actualiza con cada historia que entra a `develop`.
 | [Práctica adaptativa y retroalimentación](#6-práctica-adaptativa-y-retroalimentación-110-114) | 110, 114 | Juan David Polanco (interfaz base: Fernando Pérez) | En `develop` |
 | [Historial de resultados](#7-historial-de-resultados-scrum-41) | SCRUM-41 (169) | Nicolás Pérez | En `develop` |
 | [Accesibilidad](#8-accesibilidad-scrum-52) | SCRUM-52 | Nicolás Pérez | En `develop` (falta lo que salga del piloto) |
-| [Dashboard del docente](#9-dashboard-del-docente-scrum-40) | SCRUM-40 (124) | Nicolás Pérez (implementación: Juan David Polanco) | En esta rama |
-| [Actividades y contenidos](#10-actividades-y-contenidos-scrum-39) | SCRUM-39 (132) | Juan David Polanco | En esta rama |
+| [Dashboard del docente](#9-dashboard-del-docente-scrum-40) | SCRUM-40 (124) | Nicolás Pérez (implementación: Juan David Polanco) | En `develop` |
+| [Actividades y contenidos](#10-actividades-y-contenidos-scrum-43) | SCRUM-43 (132) | Juan David Polanco | En `develop` |
 | Registro de estudiantes | — (revisión de autenticación) | Jorel Vargas | En `develop` |
 
 ---
@@ -256,7 +256,7 @@ El dashboard incluye ahora los indicadores derivados: dimensión más débil, to
 
 ---
 
-## 10. Actividades y contenidos (SCRUM-39)
+## 10. Actividades y contenidos (SCRUM-43)
 
 **Para qué.** Que el docente cree, edite, active/desactive y elimine sus contenidos y ejercicios de práctica.
 
