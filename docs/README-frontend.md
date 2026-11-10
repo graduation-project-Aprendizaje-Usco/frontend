@@ -113,7 +113,8 @@ Reglas:
 | `/docente/estudiantes` | DOCENTE | Estudiantes y su detalle | En construcción |
 | `/docente/actividades` | DOCENTE | Gestión de actividades y contenidos | Lista |
 | `/docente/reportes` | DOCENTE | Reportes | En construcción |
-| `/admin` · `/admin/usuarios` · `/admin/roles` | ADMIN | Panel, usuarios y roles | En construcción |
+| `/admin/usuarios` | ADMIN | Administración de usuarios (SCRUM-45) | Lista |
+| `/admin` · `/admin/roles` | ADMIN | Panel y roles | En construcción |
 | `/no-autorizado` | cualquiera | Acceso denegado | Lista |
 
 «En construcción»: la ruta y el menú existen, pero la pantalla todavía muestra `PaginaEnConstruccion`.
