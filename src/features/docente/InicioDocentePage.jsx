@@ -20,6 +20,9 @@ import FiltrosGrupo from './components/FiltrosGrupo';
 import ResumenKpisGrupo from './components/ResumenKpisGrupo';
 import GraficaDimensionesGrupo from './components/GraficaDimensionesGrupo';
 import GraficaCategorias from './components/GraficaCategorias';
+import DimensionMasDebil from './components/DimensionMasDebil';
+import GraficaEvolucionGeneral from './components/GraficaEvolucionGeneral';
+import TablaEjerciciosErrores from './components/TablaEjerciciosErrores';
 import TablaEstudiantes from './components/TablaEstudiantes';
 import CrearGrupoDialog from './components/CrearGrupoDialog';
 import InscribirEstudianteDialog from './components/InscribirEstudianteDialog';
@@ -252,6 +255,7 @@ export default function InicioDocentePage() {
           {resumen && !cargandoResumen && !errorResumen && (
             <>
               <ResumenKpisGrupo resumen={resumen} />
+              <DimensionMasDebil dimension={resumen.dimensionMasDebil} />
 
               <Box
                 sx={{
@@ -262,6 +266,17 @@ export default function InicioDocentePage() {
               >
                 <GraficaDimensionesGrupo dimensiones={resumen.dimensiones} />
                 <GraficaCategorias distribucion={resumen.distribucionCategorias} />
+              </Box>
+
+              <Box
+                sx={{
+                  display: 'grid',
+                  gridTemplateColumns: { xs: '1fr', lg: '1fr 1fr' },
+                  gap: 2,
+                }}
+              >
+                <GraficaEvolucionGeneral evolucion={resumen.evolucionGeneral} />
+                <TablaEjerciciosErrores ejercicios={resumen.topEjerciciosErrores} />
               </Box>
 
               {estudiantesEnRiesgo.length > 0 && (

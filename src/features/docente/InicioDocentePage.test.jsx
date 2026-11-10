@@ -52,6 +52,37 @@ const resumen = {
       intentosCorrectos: 3,
     },
   ],
+  dimensionMasDebil: {
+    codigo: 'ALGEBRAICA',
+    nombre: 'Competencia algebraica',
+    promedio: 75,
+    estudiantesEvaluados: 2,
+    intentosEvaluados: 4,
+    intentosCorrectos: 3,
+  },
+  topEjerciciosErrores: [
+    {
+      ejercicioId: 31,
+      codigo: 'DIF-ALG-1-01',
+      enunciado: 'Factoriza $x^2 + 2x$.',
+      competenciaCodigo: 'ALGEBRAICA',
+      competenciaNombre: 'Competencia algebraica',
+      nivel: 1,
+      intentos: 5,
+      errores: 3,
+      tasaError: 60,
+    },
+  ],
+  evolucionGeneral: [
+    {
+      anio: 2026,
+      semana: 33,
+      fechaInicio: '2026-08-10',
+      intentosEvaluados: 4,
+      intentosCorrectos: 3,
+      promedio: 75,
+    },
+  ],
   distribucionCategorias: [
     { categoria: 'ALTO_RIESGO', cantidad: 1, porcentaje: 50 },
     { categoria: 'RIESGO_MODERADO', cantidad: 0, porcentaje: 0 },
@@ -147,6 +178,9 @@ describe('InicioDocentePage', () => {
     });
     expect(screen.getByText('Promedio por dimensión')).toBeInTheDocument();
     expect(screen.getByText('Distribución de categorías')).toBeInTheDocument();
+    expect(screen.getByText('Dimensión más débil')).toBeInTheDocument();
+    expect(screen.getByText('Ejercicios con más errores')).toBeInTheDocument();
+    expect(screen.getByText('Evolución general')).toBeInTheDocument();
     expect(screen.getByText('Estudiantes en riesgo')).toBeInTheDocument();
     expect(screen.getByText('Ana Alvarez')).toBeInTheDocument();
     expect(screen.getByText('Bravo, Beto')).toBeInTheDocument();
