@@ -204,7 +204,16 @@ Además se recorrió cada pantalla con Tab: orden del foco, foco visible y que n
 
 **Dashboard de progreso (SCRUM-38).** Se midió al integrarlo: 95, porque sus dos gráficas ocultas recibían el foco con Tab. Con el mismo arreglo (`accessibilityLayer={false}`) quedó en **100**.
 
-**Falta.** Medir el dashboard del docente (SCRUM-40) cuando exista, y corregir lo que encuentre el piloto. Los scripts de la auditoría están en la carpeta de evidencias (`evidencias/SCRUM-52-accesibilidad/`) para repetirla.
+**Pantallas del docente (SCRUM-40 y actividades).** Se midieron al integrarlas, con un grupo de prueba que tenía un estudiante con práctica: dashboard (también a 375 px), diálogos de crear grupo e inscribir, detalle del estudiante, actividades (ejercicios y contenidos) y los diálogos de nuevo ejercicio y nuevo contenido. Antes: 96 en el dashboard y en el detalle, 98 en el diálogo de ejercicio; 100 en lo demás. Después, **100 en las 9**, el foco visible y sin desborde a 375 px.
+
+| Hallazgo | Arreglo |
+|---|---|
+| Dashboard: la gráfica de categorías está oculta (`aria-hidden`), pero su `Pie` recibía el foco con Tab | `rootTabIndex={-1}` en el `Pie`: en recharts 3 es enfocable por defecto aunque `accessibilityLayer` esté apagado |
+| Detalle del estudiante: el panel lateral (`role="dialog"`) no tenía nombre accesible | MUI 9 ya no aplica `PaperProps`; se pasó a `slotProps.paper`, con el `aria-labelledby` del título |
+| Diálogo de ejercicio: el subtítulo «Opciones» era un `h6` justo después del `h2` del diálogo | `component="h3"` |
+| Práctica y diálogo de ejercicio: MUI 9 ignora `inputProps`, así que el campo numérico de práctica no abría el teclado numérico en el celular y los campos de respuesta y tolerancia del docente no aceptaban decimales | Se pasó a `slotProps.htmlInput`. `PracticaPage.test.jsx` ahora verifica `inputmode="decimal"` |
+
+**Falta.** Corregir lo que encuentre el piloto (SCRUM-50). Los scripts de la auditoría están en la carpeta de evidencias (`evidencias/SCRUM-52-accesibilidad/`) para repetirla.
 
 ---
 
@@ -278,5 +287,5 @@ El dashboard incluye ahora los indicadores derivados: dimensión más débil, to
 
 ## Pendientes conocidos
 
-- **Accesibilidad del dashboard docente:** medirlo con Lighthouse cuando la rama esté en staging y corregir los hallazgos del piloto.
+- **Accesibilidad:** corregir los hallazgos del piloto (SCRUM-50); las pantallas actuales ya están medidas (sección 8).
 - **Reportes del docente:** sigue en construcción (`/docente/reportes`).

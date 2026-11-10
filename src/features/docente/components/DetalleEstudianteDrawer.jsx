@@ -71,9 +71,11 @@ export default function DetalleEstudianteDrawer({
       anchor="right"
       open={abierto}
       onClose={onCerrar}
-      PaperProps={{
-        sx: { width: { xs: '100%', sm: 560 }, p: { xs: 2, sm: 3 } },
-        'aria-labelledby': 'titulo-detalle-estudiante',
+      slotProps={{
+        paper: {
+          sx: { width: { xs: '100%', sm: 560 }, p: { xs: 2, sm: 3 } },
+          'aria-labelledby': 'titulo-detalle-estudiante',
+        },
       }}
     >
       <Stack direction="row" sx={{ justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
