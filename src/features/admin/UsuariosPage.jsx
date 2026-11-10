@@ -3,6 +3,7 @@
  * crear con contraseña temporal, editar (incluido el rol) y activar o desactivar.
  */
 import { useCallback, useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router';
 import {
   Alert,
   Button,
@@ -36,7 +37,12 @@ const FILTROS_INICIALES = { buscar: '', rol: '', estado: '' };
 
 export default function UsuariosPage() {
   const { user: sesion } = useAuth();
-  const [filtros, setFiltros] = useState(FILTROS_INICIALES);
+  const [parametros] = useSearchParams();
+  // El panel del administrador enlaza aquí con ?rol=DOCENTE, por ejemplo.
+  const [filtros, setFiltros] = useState(() => {
+    const rol = parametros.get('rol');
+    return { ...FILTROS_INICIALES, rol: Object.values(ROLES).includes(rol) ? rol : '' };
+  });
   const [usuarios, setUsuarios] = useState(null);
   const [error, setError] = useState('');
   // undefined: cerrado · null: crear · objeto: editar
