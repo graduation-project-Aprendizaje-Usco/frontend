@@ -127,6 +127,8 @@ let theme = createTheme({
     MuiFormControlLabel: {
       styleOverrides: { label: { '&.Mui-disabled': { color: usco.gris.main } } },
     },
+    // El texto de ayuda de un campo deshabilitado explica por qué lo está: debe leerse.
+    MuiFormHelperText: { styleOverrides: { root: { '&.Mui-disabled': { color: usco.gris.main } } } },
   },
 });
 

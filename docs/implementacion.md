@@ -16,6 +16,7 @@ Se actualiza con cada historia que entra a `develop`.
 | [Accesibilidad](#8-accesibilidad-scrum-52) | SCRUM-52 | Nicolás Pérez | En `develop` (falta lo que salga del piloto) |
 | [Dashboard del docente](#9-dashboard-del-docente-scrum-40) | SCRUM-40 (124) | Nicolás Pérez (implementación: Juan David Polanco) | En `develop` |
 | [Actividades y contenidos](#10-actividades-y-contenidos-scrum-43) | SCRUM-43 (132) | Juan David Polanco | En `develop` |
+| [Administración de usuarios](#11-administración-de-usuarios-scrum-45) | SCRUM-45 (109) | Jorel Vargas (implementación: Nicolás Pérez) | En `feature/administracion-usuarios` |
 | Registro de estudiantes | — (revisión de autenticación) | Jorel Vargas | En `develop` |
 
 ---
@@ -282,6 +283,29 @@ El dashboard incluye ahora los indicadores derivados: dimensión más débil, to
 **Pruebas.** `ActividadesPage.test.jsx` (6 pruebas: pestañas, crear contenido, crear ejercicio, editar, activar/eliminar y desactivar tras 409) y `actividadesApi.test.js` (clientes de contenidos y ejercicios).
 
 **Cómo probarlo a mano.** Entrar como docente, abrir `/docente/actividades`, crear un contenido, crear un ejercicio, iniciar sesión como estudiante y comprobar que aparece en Práctica. Luego desactivarlo y verificar que desaparece.
+
+## 11. Administración de usuarios (SCRUM-45)
+
+**Para qué.** Pantalla `/admin/usuarios` para que el administrador cree, edite, cambie el rol y desactive cuentas.
+
+| Archivo | Qué hace |
+|---|---|
+| `api/adminUsuariosApi.js` | `listar()`, `crear()`, `actualizar()` y `cambiarEstado()` contra `/api/admin/usuarios` |
+| `features/admin/UsuariosPage.jsx` | Búsqueda, filtros por rol y estado, tabla, y acciones de editar, activar y desactivar (con confirmación) |
+| `features/admin/UsuarioFormDialog.jsx` | Formulario de crear o editar; al crear muestra la contraseña temporal una sola vez |
+
+**Decisiones.**
+
+- **Mismas reglas que el backend:** si el rol es Estudiante, el formulario exige correo de estudiante y programa académico (reutiliza `reglasRegistro.js`).
+- **El administrador no puede desactivarse ni cambiarse el rol:** el botón y el selector aparecen deshabilitados para su propia cuenta; el backend también lo impide.
+- **El correo no se edita:** identifica la cuenta.
+- **«Roles y permisos» sigue en construcción:** los tres roles son fijos y el rol se cambia desde cada usuario.
+
+**Accesibilidad.** Lighthouse 100 en la pantalla (también a 375 px) y en los diálogos de crear, editar y confirmar; foco visible en todas las paradas de Tab. El texto de ayuda de los campos deshabilitados salía en gris 2.7:1 en el diálogo de editar; en el tema ahora usa el gris secundario, igual que las etiquetas deshabilitadas (sección 8).
+
+**Pruebas.** `UsuariosPage.test.jsx`: 6 pruebas (filtros, crear con contraseña temporal, validación de estudiante, editar rol, confirmar desactivación y no desactivarse a uno mismo, reactivar).
+
+**Cómo probarlo a mano.** Entrar como `admin@aprendizaje.test` / `Admin2026*` → **Usuarios** → crear un docente, copiar la contraseña temporal e iniciar sesión con ella en otra ventana.
 
 ---
 
