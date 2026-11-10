@@ -21,6 +21,12 @@ export async function actualizar(id, usuario) {
   return data;
 }
 
+/** GET /api/admin/resumen: { usuariosPorRol: [{ rol, total, activos }], grupos, contenidosActivos, ejerciciosActivos }. */
+export async function obtenerResumen() {
+  const { data } = await api.get('/admin/resumen');
+  return data;
+}
+
 export async function cambiarEstado(id, estado) {
   const { data } = await api.patch(`/admin/usuarios/${id}/estado`, { estado });
   return data;

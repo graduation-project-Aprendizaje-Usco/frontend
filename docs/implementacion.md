@@ -16,7 +16,8 @@ Se actualiza con cada historia que entra a `develop`.
 | [Accesibilidad](#8-accesibilidad-scrum-52) | SCRUM-52 | Nicolás Pérez | En `develop` (falta lo que salga del piloto) |
 | [Dashboard del docente](#9-dashboard-del-docente-scrum-40) | SCRUM-40 (124) | Nicolás Pérez (implementación: Juan David Polanco) | En `develop` |
 | [Actividades y contenidos](#10-actividades-y-contenidos-scrum-43) | SCRUM-43 (132) | Juan David Polanco | En `develop` |
-| [Administración de usuarios](#11-administración-de-usuarios-scrum-45) | SCRUM-45 (109) | Jorel Vargas (implementación: Nicolás Pérez) | En `feature/administracion-usuarios` |
+| [Administración de usuarios](#11-administración-de-usuarios-scrum-45) | SCRUM-45 (109) | Jorel Vargas (implementación: Nicolás Pérez) | En `develop` |
+| [Panel del administrador](#12-panel-del-administrador-scrum-46) | SCRUM-46 | Fernando Pérez (implementación: Nicolás Pérez) | En `feature/panel-administracion` |
 | Registro de estudiantes | — (revisión de autenticación) | Jorel Vargas | En `develop` |
 
 ---
@@ -306,6 +307,23 @@ El dashboard incluye ahora los indicadores derivados: dimensión más débil, to
 **Pruebas.** `UsuariosPage.test.jsx`: 6 pruebas (filtros, crear con contraseña temporal, validación de estudiante, editar rol, confirmar desactivación y no desactivarse a uno mismo, reactivar).
 
 **Cómo probarlo a mano.** Entrar como `admin@aprendizaje.test` / `Admin2026*` → **Usuarios** → crear un docente, copiar la contraseña temporal e iniciar sesión con ella en otra ventana.
+
+## 12. Panel del administrador (SCRUM-46)
+
+**Para qué.** Inicio del administrador (`/admin`) con los conteos reales de la plataforma y accesos a la gestión.
+
+| Archivo | Qué hace |
+|---|---|
+| `features/admin/InicioAdminPage.jsx` | Tarjetas de estudiantes, docentes y administradores (total y activos), grupos, contenidos activos y ejercicios activos |
+| `api/adminUsuariosApi.js` | `obtenerResumen()` contra `GET /api/admin/resumen` |
+| `features/admin/UsuariosPage.jsx` | Acepta `?rol=` en la URL para abrir con ese filtro |
+
+**Decisiones.**
+
+- **Enlaces solo a pantallas que existen:** cada rol enlaza a Usuarios ya filtrado (por ejemplo, «Ver docentes» → `/admin/usuarios?rol=DOCENTE`), y el botón «Gestionar usuarios» lleva a la lista completa. Grupos y actividades solo muestran el número, porque el administrador no tiene pantallas para gestionarlos.
+- **Cada tarjeta es una región con nombre** (`aria-label`), así un lector de pantalla las recorre como secciones.
+
+**Pruebas.** `InicioAdminPage.test.jsx`: 3 pruebas (conteos y enlaces, error al cargar, Usuarios abre con el filtro del enlace).
 
 ---
 
