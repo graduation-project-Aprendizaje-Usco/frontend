@@ -105,7 +105,7 @@ Reglas:
 |---|---|---|---|
 | `/login` | público | Inicio de sesión | Lista |
 | `/registro` | público | Registro de estudiantes (correo `u` + 11 dígitos + `@usco.edu.co`) | Lista |
-| `/estudiante` | ESTUDIANTE | Inicio del estudiante | En construcción |
+| `/estudiante` | ESTUDIANTE | Inicio del estudiante: dashboard de progreso | Lista |
 | `/estudiante/diagnostico` | ESTUDIANTE | Prueba diagnóstica y resultado | Lista |
 | `/estudiante/practica` | ESTUDIANTE | Ejercicios adaptativos | Lista |
 | `/estudiante/progreso` | ESTUDIANTE | Dashboard Mi progreso | Lista |
@@ -114,6 +114,8 @@ Reglas:
 | `/docente/actividades` | DOCENTE | Gestión de actividades y contenidos | Lista |
 | `/docente/reportes` | DOCENTE | Reportes | En construcción |
 | `/admin/usuarios` | ADMIN | Administración de usuarios (SCRUM-45) | Lista |
+| `/admin/grupos` | ADMIN | Grupos de los docentes y estudiantes inscritos (SCRUM-46) | Lista |
+| `/admin/actividades` | ADMIN | Contenidos y ejercicios de todos los docentes (SCRUM-46) | Lista |
 | `/admin` | ADMIN | Panel de administración (SCRUM-46) | Lista |
 | `/admin/roles` | ADMIN | Roles y permisos | En construcción |
 | `/no-autorizado` | cualquiera | Acceso denegado | Lista |
@@ -122,7 +124,7 @@ Reglas:
 
 ### Mi progreso del estudiante
 
-La ruta `/estudiante/progreso` está protegida para `ESTUDIANTE`, se carga dentro de `EstudianteLayout` y aparece como **Mi progreso** en el menú definido en `src/routes/navegacion.js`. La pantalla está implementada en `src/features/progreso/ProgresoPage.jsx`; usa `src/api/progresoApi.js` para llamar `GET /api/progreso/me` del backend.
+La ruta `/estudiante/progreso` está protegida para `ESTUDIANTE`, se carga dentro de `EstudianteLayout` y aparece como **Mi progreso** en el menú definido en `src/routes/navegacion.js`. La pantalla está implementada en `src/features/progreso/ProgresoPage.jsx`; usa `src/api/progresoApi.js` para llamar `GET /api/progreso/me` del backend. El inicio del estudiante (`/estudiante`) reutiliza ese mismo dashboard para que el login no termine en una página en construcción.
 
 La API del módulo llama al cliente Axios compartido `src/api/client.js`: la URL base sale de `VITE_API_URL`, el interceptor adjunta el token almacenado y la respuesta 401 sigue el flujo compartido de expiración de sesión. Los componentes no crean clientes HTTP propios ni calculan indicadores con cifras simuladas.
 
