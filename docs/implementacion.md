@@ -335,6 +335,7 @@ El dashboard incluye ahora los indicadores derivados: dimensión más débil, to
 |---|---|
 | `features/admin/GruposAdminPage.jsx` | Lista los grupos, busca por código/nombre/docente y abre un Drawer con los estudiantes |
 | `features/admin/ActividadesAdminPage.jsx` | Muestra contenidos y ejercicios en pestañas, con búsqueda y etiquetas de competencia, nivel y tipo |
+| `features/admin/RolesPage.jsx` | Explica los roles y enlaza a Usuarios con el filtro correspondiente; el cambio de rol se hace en la ficha del usuario |
 | `api/adminActividadesApi.js` | `obtener()` contra `GET /api/admin/actividades` |
 | `api/gruposApi.js` | Agrega `estudiantes(grupoId)` contra `GET /api/grupos/{id}/estudiantes` |
 | `routes/AppRouter.jsx` | Rutas `/admin/grupos` y `/admin/actividades` |
@@ -347,7 +348,7 @@ El dashboard incluye ahora los indicadores derivados: dimensión más débil, to
 - **Semilla:** los registros sin docente creador se muestran como «Semilla».
 - **Pestaña en la URL:** `?tab=ejercicios` permite que el panel abra directamente la lista de ejercicios.
 
-**Pruebas.** `GruposAdminPage.test.jsx` (lista, detalle y búsqueda), `ActividadesAdminPage.test.jsx` (contenidos, ejercicios, pestaña por URL y error) e `InicioAdminPage.test.jsx` (enlaces).
+**Pruebas.** `GruposAdminPage.test.jsx` (lista, detalle y búsqueda), `ActividadesAdminPage.test.jsx` (contenidos, ejercicios, pestaña por URL y error), `RolesPage.test.jsx` (roles y enlaces) e `InicioAdminPage.test.jsx` (enlaces).
 
 ## 14. Integración end-to-end (140)
 
@@ -363,3 +364,4 @@ El dashboard incluye ahora los indicadores derivados: dimensión más débil, to
 
 - **Accesibilidad:** corregir los hallazgos del piloto (SCRUM-50); las pantallas actuales ya están medidas (sección 8).
 - **Reportes del docente:** sigue en construcción (`/docente/reportes`).
+- **Usabilidad:** el protocolo y la simulación interna están listos en el backend (`docs/pruebas/`), pero faltan usuarios reales y SUS (#143/#144).

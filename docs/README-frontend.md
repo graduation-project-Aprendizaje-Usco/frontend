@@ -50,7 +50,7 @@ Abre http://localhost:5173.
 
 Antes de abrir un PR: `npm run lint`, `npm test` y `npm run build` sin errores (es lo mismo que corre CI).
 
-Verificación registrada el **4 de noviembre de 2026**: `npm test` pasó **81 pruebas en 11 archivos** y `npm run build` generó el build de producción correctamente.
+Verificación registrada el **10 de noviembre de 2026**: `npm test` pasó **122 pruebas en 22 archivos** y `npm run build` generó el build de producción correctamente.
 
 ### Pruebas
 
@@ -117,7 +117,7 @@ Reglas:
 | `/admin/grupos` | ADMIN | Grupos de los docentes y estudiantes inscritos (SCRUM-46) | Lista |
 | `/admin/actividades` | ADMIN | Contenidos y ejercicios de todos los docentes (SCRUM-46) | Lista |
 | `/admin` | ADMIN | Panel de administración (SCRUM-46) | Lista |
-| `/admin/roles` | ADMIN | Roles y permisos | En construcción |
+| `/admin/roles` | ADMIN | Roles y permisos: explicación y acceso a usuarios filtrados | Lista |
 | `/no-autorizado` | cualquiera | Acceso denegado | Lista |
 
 «En construcción»: la ruta y el menú existen, pero la pantalla todavía muestra `PaginaEnConstruccion`.
