@@ -20,6 +20,7 @@ Se actualiza con cada historia que entra a `develop`.
 | [Panel del administrador](#12-panel-del-administrador-scrum-46) | SCRUM-46 | Fernando Pérez (implementación: Nicolás Pérez) | En `develop` · verificado |
 | [Grupos y actividades del administrador](#13-grupos-y-actividades-del-administrador-scrum-46) | SCRUM-46 | Fernando Pérez (implementación: Nicolás Pérez) | En `develop` |
 | [Integración end-to-end](#14-integración-end-to-end-140) | 140 | Juan David Polanco | Verificado en local; staging pendiente |
+| [Registro por invitación](#15-registro-por-invitación-150) | 150 | Jorel Vargas | En `develop` |
 | Registro de estudiantes | — (revisión de autenticación) | Jorel Vargas | En `develop` |
 
 ---
@@ -357,6 +358,24 @@ El dashboard incluye ahora los indicadores derivados: dimensión más débil, to
 - `/estudiante` ahora muestra el dashboard de progreso que ya existía en `/estudiante/progreso`, para que el login no termine en una página «en construcción».
 - El guion manual y la evidencia local están en `docs/pruebas/e2e-sprint-4.md` del backend.
 - **Staging pendiente de #33:** la validación se repite cuando exista el entorno.
+
+## 15. Registro por invitación (150)
+
+**Para qué.** Cerrar el registro público y permitir que el docente invite a los estudiantes de su grupo.
+
+| Archivo | Qué hace |
+|---|---|
+| `features/docente/EstudiantesPage.jsx` | Selector de grupo, carga de CSV (`correo;nombres;apellidos`), tabla de estados y reenvío |
+| `api/invitacionesApi.js` | `listarInvitaciones`, `cargarInvitaciones`, `reenviarInvitacion` y `obtenerInvitacion` |
+| `features/auth/RegistroPage.jsx` | Lee `?token=`, valida la invitación, precarga correo/nombres y envía `tokenInvitacion` al registrarse |
+
+**Decisiones.**
+
+- **CSV en el navegador:** el docente descarga una plantilla, el navegador valida las columnas y envía la lista al backend; el backend vuelve a validar cada fila antes de guardar.
+- **Estados visibles:** `Invitado`, `Registrado` y `Vencida`; el reenvío se deshabilita si ya se registró.
+- **Sin token no hay registro:** `/registro` sin una invitación válida muestra un aviso y no permite crear la cuenta.
+
+**Pruebas.** `RegistroPage.test.jsx` cubre la validación de la invitación y el envío del token. La carga y el estado del listado quedan cubiertos por las pruebas del backend de invitaciones.
 
 ---
 

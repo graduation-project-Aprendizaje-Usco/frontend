@@ -104,13 +104,13 @@ Reglas:
 | Ruta | Rol | Pantalla | Estado |
 |---|---|---|---|
 | `/login` | público | Inicio de sesión | Lista |
-| `/registro` | público | Registro de estudiantes (correo `u` + 11 dígitos + `@usco.edu.co`) | Lista |
+| `/registro?token=…` | público | Registro de estudiantes con invitación (correo `u` + 11 dígitos + `@usco.edu.co`) | Lista |
 | `/estudiante` | ESTUDIANTE | Inicio del estudiante: dashboard de progreso | Lista |
 | `/estudiante/diagnostico` | ESTUDIANTE | Prueba diagnóstica y resultado | Lista |
 | `/estudiante/practica` | ESTUDIANTE | Ejercicios adaptativos | Lista |
 | `/estudiante/progreso` | ESTUDIANTE | Dashboard Mi progreso | Lista |
 | `/docente` | DOCENTE | Dashboard de desempeño del grupo (SCRUM-40); el detalle del estudiante abre en un Drawer | Lista |
-| `/docente/estudiantes` | DOCENTE | Estudiantes y su detalle | En construcción |
+| `/docente/estudiantes` | DOCENTE | Carga del listado, estado de invitaciones y reenvío | Lista |
 | `/docente/actividades` | DOCENTE | Gestión de actividades y contenidos | Lista |
 | `/docente/reportes` | DOCENTE | Reportes | En construcción |
 | `/admin/usuarios` | ADMIN | Administración de usuarios (SCRUM-45) | Lista |
@@ -159,7 +159,11 @@ Cómo funciona la sesión (`AuthContext`):
 - Al abrir la app con una sesión guardada se llama a `GET /api/auth/me`. Con 401 (token alterado, usuario desactivado) o si el rol cambió, se cierra la sesión. Sin conexión con el backend, se conserva.
 - La sesión se cierra sola al vencer el token, ante un 401 de cualquier petición, al cerrarla en otra pestaña y si el navegador muestra con "Atrás" una página guardada en su caché.
 
-Registro: las reglas de `features/auth/reglasRegistro.js` deben coincidir con `RegistroRequest.java` y `ProgramaAcademico.java` del backend (el backend es la fuente de verdad).
+Registro: las reglas de `features/auth/reglasRegistro.js` deben coincidir con `RegistroRequest.java` y `ProgramaAcademico.java` del backend (el backend es la fuente de verdad). El registro está cerrado: `/registro` sin `?token=` muestra un aviso y no permite crear la cuenta.
+
+### Invitaciones de estudiantes
+
+El docente entra a `/docente/estudiantes`, elige un grupo y carga un CSV con columnas `correo;nombres;apellidos` (también se acepta coma). La tabla muestra el estado `Invitado`, `Registrado` o `Vencida` y permite reenviar el enlace. El estudiante abre `/registro?token=…`, ve el grupo y el correo precargados, elige su programa y crea la cuenta; al registrarse queda inscrito en el grupo y la invitación se marca como usada.
 
 ## 7. Convenciones de código
 
