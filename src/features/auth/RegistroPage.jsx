@@ -15,7 +15,7 @@
  * a su campo, foco al primer campo inválido y error general con role="alert".
  */
 import { useEffect, useState } from 'react';
-import { Navigate, Link as RouterLink, useNavigate } from 'react-router';
+import { Navigate, Link as RouterLink, useNavigate, useSearchParams } from 'react-router';
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -35,6 +35,7 @@ import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import { registro } from '../../api/authApi';
 import { asignarErroresDeCampos } from '../../api/campos';
 import { mensajeDeError } from '../../api/errores';
+import { obtenerInvitacion } from '../../api/invitacionesApi';
 import { useAuth } from '../../context/AuthContext';
 import { INICIO_POR_ROL } from '../../routes/navegacion';
 import PlantillaAcceso from './PlantillaAcceso';
@@ -77,13 +78,21 @@ const CAMPOS = ['nombres', 'apellidos', 'correo', 'programaAcademico', 'password
 export default function RegistroPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [parametros] = useSearchParams();
+  const token = parametros.get('token');
   const [verPassword, setVerPassword] = useState(false);
   const [errorServidor, setErrorServidor] = useState('');
+  const [invitacion, setInvitacion] = useState(null);
+  const [cargandoInvitacion, setCargandoInvitacion] = useState(Boolean(token));
+  const [errorInvitacion, setErrorInvitacion] = useState(
+    token ? '' : 'El registro está disponible solo con una invitación válida.',
+  );
 
   const {
     register,
     handleSubmit,
     setError,
+    reset,
     control,
     formState: { errors, isSubmitting },
   } = useForm({
@@ -102,15 +111,54 @@ export default function RegistroPage() {
     document.title = 'Crear cuenta · Aprendizaje USCO';
   }, []);
 
+  useEffect(() => {
+    if (!token) return;
+    obtenerInvitacion(token)
+      .then((datos) => {
+        setInvitacion(datos);
+        reset({
+          nombres: datos.nombres,
+          apellidos: datos.apellidos,
+          correo: datos.correo,
+          programaAcademico: '',
+          password: '',
+          confirmarPassword: '',
+        });
+      })
+      .catch((error) => {
+        setErrorInvitacion(mensajeDeError(error, 'La invitación no es válida o venció.'));
+      })
+      .finally(() => setCargandoInvitacion(false));
+  }, [token, reset]);
+
   // Con sesión abierta no tiene sentido registrarse: al inicio de su rol.
   if (user) return <Navigate to={INICIO_POR_ROL[user.rol] ?? '/no-autorizado'} replace />;
+
+  if (cargandoInvitacion) {
+    return (
+      <PlantillaAcceso>
+        <Alert severity="info">Validando tu invitación…</Alert>
+      </PlantillaAcceso>
+    );
+  }
+
+  if (errorInvitacion) {
+    return (
+      <PlantillaAcceso>
+        <Stack spacing={2}>
+          <Alert severity="error">{errorInvitacion}</Alert>
+          <Link component={RouterLink} to="/login">Volver al inicio de sesión</Link>
+        </Stack>
+      </PlantillaAcceso>
+    );
+  }
 
   const enviar = async ({ nombres, apellidos, correo: correoEscrito, programaAcademico, password }) => {
     setErrorServidor('');
     const correo = correoEscrito.trim().toLowerCase();
     try {
       // confirmarPassword no se envía: solo se usa en el formulario.
-      await registro({ nombres, apellidos, correo, programaAcademico, password });
+      await registro({ nombres, apellidos, correo, programaAcademico, password, tokenInvitacion: token });
       navigate('/login', { state: { registrado: true, correo } });
     } catch (error) {
       if (error?.response?.status === 409) {
@@ -158,6 +206,12 @@ export default function RegistroPage() {
           </Typography>
           <Typography color="text.secondary">Registro para estudiantes con correo institucional.</Typography>
         </Stack>
+
+        {invitacion && (
+          <Alert severity="info">
+            Invitación para el grupo <strong>{invitacion.grupo}</strong>. El correo ya está asociado a esta invitación.
+          </Alert>
+        )}
 
         {errorServidor && (
           <Alert severity="error" role="alert">

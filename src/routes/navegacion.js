@@ -7,6 +7,7 @@ import MenuBookOutlined from '@mui/icons-material/MenuBookOutlined';
 import AssessmentOutlined from '@mui/icons-material/AssessmentOutlined';
 import ManageAccountsOutlined from '@mui/icons-material/ManageAccountsOutlined';
 import AdminPanelSettingsOutlined from '@mui/icons-material/AdminPanelSettingsOutlined';
+import ClassOutlined from '@mui/icons-material/ClassOutlined';
 
 /**
  * Fuente única de verdad de roles, rutas de inicio y menús.
@@ -48,6 +49,8 @@ export const MENU_POR_ROL = {
   [ROLES.ADMIN]: [
     { etiqueta: 'Inicio', ruta: '/admin', icono: HomeOutlined, exacta: true },
     { etiqueta: 'Usuarios', ruta: '/admin/usuarios', icono: ManageAccountsOutlined },
+    { etiqueta: 'Grupos', ruta: '/admin/grupos', icono: ClassOutlined },
+    { etiqueta: 'Actividades', ruta: '/admin/actividades', icono: MenuBookOutlined },
     { etiqueta: 'Roles y permisos', ruta: '/admin/roles', icono: AdminPanelSettingsOutlined },
   ],
 };

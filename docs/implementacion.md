@@ -17,7 +17,10 @@ Se actualiza con cada historia que entra a `develop`.
 | [Dashboard del docente](#9-dashboard-del-docente-scrum-40) | SCRUM-40 (124) | Nicolás Pérez (implementación: Juan David Polanco) | En `develop` |
 | [Actividades y contenidos](#10-actividades-y-contenidos-scrum-43) | SCRUM-43 (132) | Juan David Polanco | En `develop` |
 | [Administración de usuarios](#11-administración-de-usuarios-scrum-45) | SCRUM-45 (109) | Jorel Vargas (implementación: Nicolás Pérez) | En `develop` |
-| [Panel del administrador](#12-panel-del-administrador-scrum-46) | SCRUM-46 | Fernando Pérez (implementación: Nicolás Pérez) | En `feature/panel-administracion` |
+| [Panel del administrador](#12-panel-del-administrador-scrum-46) | SCRUM-46 | Fernando Pérez (implementación: Nicolás Pérez) | En `develop` · verificado |
+| [Grupos y actividades del administrador](#13-grupos-y-actividades-del-administrador-scrum-46) | SCRUM-46 | Fernando Pérez (implementación: Nicolás Pérez) | En `develop` |
+| [Integración end-to-end](#14-integración-end-to-end-140) | 140 | Juan David Polanco | Verificado en local; staging pendiente |
+| [Registro por invitación](#15-registro-por-invitación-150) | 150 | Jorel Vargas | En `develop` |
 | Registro de estudiantes | — (revisión de autenticación) | Jorel Vargas | En `develop` |
 
 ---
@@ -320,10 +323,59 @@ El dashboard incluye ahora los indicadores derivados: dimensión más débil, to
 
 **Decisiones.**
 
-- **Enlaces solo a pantallas que existen:** cada rol enlaza a Usuarios ya filtrado (por ejemplo, «Ver docentes» → `/admin/usuarios?rol=DOCENTE`), y el botón «Gestionar usuarios» lleva a la lista completa. Grupos y actividades solo muestran el número, porque el administrador no tiene pantallas para gestionarlos.
+- **Enlaces a las pantallas de gestión:** cada rol enlaza a Usuarios ya filtrado (por ejemplo, «Ver docentes» → `/admin/usuarios?rol=DOCENTE`); grupos, contenidos y ejercicios enlazan a las vistas de la sección 13.
 - **Cada tarjeta es una región con nombre** (`aria-label`), así un lector de pantalla las recorre como secciones.
 
 **Pruebas.** `InicioAdminPage.test.jsx`: 3 pruebas (conteos y enlaces, error al cargar, Usuarios abre con el filtro del enlace).
+
+## 13. Grupos y actividades del administrador (SCRUM-46)
+
+**Para qué.** Completar el panel con vistas de solo lectura para que los conteos de grupos, contenidos y ejercicios tengan una pantalla a la que llegar.
+
+| Archivo | Qué hace |
+|---|---|
+| `features/admin/GruposAdminPage.jsx` | Lista los grupos, busca por código/nombre/docente y abre un Drawer con los estudiantes |
+| `features/admin/ActividadesAdminPage.jsx` | Muestra contenidos y ejercicios en pestañas, con búsqueda y etiquetas de competencia, nivel y tipo |
+| `features/admin/RolesPage.jsx` | Explica los roles y enlaza a Usuarios con el filtro correspondiente; el cambio de rol se hace en la ficha del usuario |
+| `api/adminActividadesApi.js` | `obtener()` contra `GET /api/admin/actividades` |
+| `api/gruposApi.js` | Agrega `estudiantes(grupoId)` contra `GET /api/grupos/{id}/estudiantes` |
+| `routes/AppRouter.jsx` | Rutas `/admin/grupos` y `/admin/actividades` |
+| `routes/navegacion.js` | Opciones «Grupos» y «Actividades» en el menú del administrador |
+
+**Decisiones.**
+
+- **Solo lectura:** el administrador consulta, pero la creación y edición siguen siendo del docente; no se duplican formularios.
+- **Sin claves:** la tabla de ejercicios muestra código, contenido, competencia, nivel, tipo, docente y estado; nunca la respuesta correcta ni la explicación.
+- **Semilla:** los registros sin docente creador se muestran como «Semilla».
+- **Pestaña en la URL:** `?tab=ejercicios` permite que el panel abra directamente la lista de ejercicios.
+
+**Pruebas.** `GruposAdminPage.test.jsx` (lista, detalle y búsqueda), `ActividadesAdminPage.test.jsx` (contenidos, ejercicios, pestaña por URL y error), `RolesPage.test.jsx` (roles y enlaces) e `InicioAdminPage.test.jsx` (enlaces).
+
+## 14. Integración end-to-end (140)
+
+**Para qué.** Verificar que el login y los tres flujos comparten los mismos usuarios, roles y datos.
+
+- `/estudiante` ahora muestra el dashboard de progreso que ya existía en `/estudiante/progreso`, para que el login no termine en una página «en construcción».
+- El guion manual y la evidencia local están en `docs/pruebas/e2e-sprint-4.md` del backend.
+- **Staging pendiente de #33:** la validación se repite cuando exista el entorno.
+
+## 15. Registro por invitación (150)
+
+**Para qué.** Cerrar el registro público y permitir que el docente invite a los estudiantes de su grupo.
+
+| Archivo | Qué hace |
+|---|---|
+| `features/docente/EstudiantesPage.jsx` | Selector de grupo, carga de CSV (`correo;nombres;apellidos`), tabla de estados y reenvío |
+| `api/invitacionesApi.js` | `listarInvitaciones`, `cargarInvitaciones`, `reenviarInvitacion` y `obtenerInvitacion` |
+| `features/auth/RegistroPage.jsx` | Lee `?token=`, valida la invitación, precarga correo/nombres y envía `tokenInvitacion` al registrarse |
+
+**Decisiones.**
+
+- **CSV en el navegador:** el docente descarga una plantilla, el navegador valida las columnas y envía la lista al backend; el backend vuelve a validar cada fila antes de guardar.
+- **Estados visibles:** `Invitado`, `Registrado` y `Vencida`; el reenvío se deshabilita si ya se registró.
+- **Sin token no hay registro:** `/registro` sin una invitación válida muestra un aviso y no permite crear la cuenta.
+
+**Pruebas.** `RegistroPage.test.jsx` cubre la validación de la invitación y el envío del token. La carga y el estado del listado quedan cubiertos por las pruebas del backend de invitaciones.
 
 ---
 
@@ -331,3 +383,4 @@ El dashboard incluye ahora los indicadores derivados: dimensión más débil, to
 
 - **Accesibilidad:** corregir los hallazgos del piloto (SCRUM-50); las pantallas actuales ya están medidas (sección 8).
 - **Reportes del docente:** sigue en construcción (`/docente/reportes`).
+- **Usabilidad:** el protocolo y la simulación interna están listos en el backend (`docs/pruebas/`), pero faltan usuarios reales y SUS (#143/#144).

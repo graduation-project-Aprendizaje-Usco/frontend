@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { Route, Routes } from 'react-router';
 import { registro } from '../../api/authApi';
+import { obtenerInvitacion } from '../../api/invitacionesApi';
 import { renderConApp } from '../../test/utilidades';
 import LoginPage from './LoginPage';
 import RegistroPage from './RegistroPage';
@@ -13,6 +14,7 @@ vi.mock('../../api/authApi', () => ({
   login: vi.fn(),
   me: vi.fn(() => new Promise(() => {})),
 }));
+vi.mock('../../api/invitacionesApi', () => ({ obtenerInvitacion: vi.fn() }));
 
 function Rutas() {
   return (
@@ -46,9 +48,21 @@ async function llenar(usuario, datos = {}) {
 
 const enviar = (usuario) => usuario.click(screen.getByRole('button', { name: 'Crear cuenta' }));
 
+async function renderRegistro() {
+  renderConApp(<Rutas />, { ruta: '/registro?token=invitacion-prueba' });
+  await screen.findByLabelText(/^Nombres/);
+}
+
 describe('RegistroPage', () => {
   beforeEach(() => {
     registro.mockReset();
+    obtenerInvitacion.mockReset();
+    obtenerInvitacion.mockResolvedValue({
+      correo: '',
+      nombres: '',
+      apellidos: '',
+      grupo: 'Grupo de prueba',
+    });
   });
 
   it('el login enlaza a la pantalla de registro (hallazgo 1)', async () => {
@@ -57,12 +71,14 @@ describe('RegistroPage', () => {
 
     await usuario.click(screen.getByRole('link', { name: 'Crear cuenta' }));
 
-    expect(screen.getByRole('heading', { name: 'Crear cuenta' })).toBeInTheDocument();
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'El registro está disponible solo con una invitación válida.',
+    );
   });
 
   it('muestra los errores de los campos vacíos y no llama al backend', async () => {
     const usuario = userEvent.setup();
-    renderConApp(<Rutas />, { ruta: '/registro' });
+    await renderRegistro();
 
     await enviar(usuario);
 
@@ -76,7 +92,7 @@ describe('RegistroPage', () => {
     'rechaza el correo %s porque no es de estudiante',
     async (correo) => {
       const usuario = userEvent.setup();
-      renderConApp(<Rutas />, { ruta: '/registro' });
+      await renderRegistro();
 
       await llenar(usuario, { correo });
       await enviar(usuario);
@@ -88,7 +104,7 @@ describe('RegistroPage', () => {
 
   it('exige letra y número en la contraseña y que la confirmación coincida', async () => {
     const usuario = userEvent.setup();
-    renderConApp(<Rutas />, { ruta: '/registro' });
+    await renderRegistro();
 
     await llenar(usuario, { password: 'SoloLetras', confirmar: 'OtraCosa1' });
     await enviar(usuario);
@@ -100,7 +116,7 @@ describe('RegistroPage', () => {
   it('registra con los datos correctos y vuelve al login con el aviso y el correo escrito', async () => {
     registro.mockResolvedValue({ id: 9, nombres: 'Ana María', correo: 'u20201234567@usco.edu.co', rol: 'ESTUDIANTE' });
     const usuario = userEvent.setup();
-    renderConApp(<Rutas />, { ruta: '/registro' });
+    await renderRegistro();
 
     await llenar(usuario, { correo: 'U20201234567@USCO.edu.co' });
     await enviar(usuario);
@@ -112,6 +128,7 @@ describe('RegistroPage', () => {
         correo: 'u20201234567@usco.edu.co',
         programaAcademico: 'Ingeniería Civil',
         password: 'Clave2026*',
+        tokenInvitacion: 'invitacion-prueba',
       }),
     );
     expect(await screen.findByText(/Tu cuenta quedó creada/)).toBeInTheDocument();
@@ -123,7 +140,7 @@ describe('RegistroPage', () => {
       response: { status: 409, data: { status: 409, message: 'El correo ya está registrado' } },
     });
     const usuario = userEvent.setup();
-    renderConApp(<Rutas />, { ruta: '/registro' });
+    await renderRegistro();
 
     await llenar(usuario);
     await enviar(usuario);
@@ -144,7 +161,7 @@ describe('RegistroPage', () => {
       },
     });
     const usuario = userEvent.setup();
-    renderConApp(<Rutas />, { ruta: '/registro' });
+    await renderRegistro();
 
     await llenar(usuario);
     await enviar(usuario);
@@ -155,11 +172,11 @@ describe('RegistroPage', () => {
   it('muestra un error general si no hay conexión con el servidor', async () => {
     registro.mockRejectedValue({ request: {} });
     const usuario = userEvent.setup();
-    renderConApp(<Rutas />, { ruta: '/registro' });
+    await renderRegistro();
 
     await llenar(usuario);
     await enviar(usuario);
 
-    expect(await screen.findByRole('alert')).toHaveTextContent('No pudimos conectar con el servidor');
+    expect(await screen.findByText(/No pudimos conectar con el servidor/)).toBeInTheDocument();
   });
 });

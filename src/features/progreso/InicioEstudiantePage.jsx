@@ -1,10 +1,10 @@
-import PaginaEnConstruccion from '../../components/PaginaEnConstruccion';
+import ProgresoPage from './ProgresoPage';
 
+/**
+ * Inicio del estudiante (SCRUM-140). El login lleva a /estudiante, así que esta
+ * ruta muestra el mismo dashboard de progreso que /estudiante/progreso para no
+ * cortar el flujo con una página "en construcción".
+ */
 export default function InicioEstudiantePage() {
-  return (
-    <PaginaEnConstruccion
-      titulo="Inicio"
-      descripcion="Resumen del diagnóstico, nivel por dimensión y accesos a la práctica (RF-09)."
-    />
-  );
+  return <ProgresoPage />;
 }

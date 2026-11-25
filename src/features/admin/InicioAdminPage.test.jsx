@@ -42,9 +42,21 @@ describe('InicioAdminPage', () => {
       '/admin/usuarios?rol=ESTUDIANTE',
     );
     expect(screen.getByRole('link', { name: 'Ver docentes' })).toHaveAttribute('href', '/admin/usuarios?rol=DOCENTE');
-    expect(within(screen.getByRole('region', { name: 'Grupos' })).getByText('2')).toBeInTheDocument();
-    expect(within(screen.getByRole('region', { name: 'Contenidos activos' })).getByText('18')).toBeInTheDocument();
-    expect(within(screen.getByRole('region', { name: 'Ejercicios activos' })).getByText('90')).toBeInTheDocument();
+    const grupos = screen.getByRole('region', { name: 'Grupos' });
+    expect(within(grupos).getByText('2')).toBeInTheDocument();
+    expect(within(grupos).getByRole('link', { name: 'Ver grupos' })).toHaveAttribute('href', '/admin/grupos');
+    const contenidos = screen.getByRole('region', { name: 'Contenidos activos' });
+    expect(within(contenidos).getByText('18')).toBeInTheDocument();
+    expect(within(contenidos).getByRole('link', { name: 'Ver contenidos' })).toHaveAttribute(
+      'href',
+      '/admin/actividades?tab=contenidos',
+    );
+    const ejercicios = screen.getByRole('region', { name: 'Ejercicios activos' });
+    expect(within(ejercicios).getByText('90')).toBeInTheDocument();
+    expect(within(ejercicios).getByRole('link', { name: 'Ver ejercicios' })).toHaveAttribute(
+      'href',
+      '/admin/actividades?tab=ejercicios',
+    );
   });
 
   it('muestra un error si el resumen no carga', async () => {

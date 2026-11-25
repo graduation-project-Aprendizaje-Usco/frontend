@@ -50,7 +50,7 @@ Abre http://localhost:5173.
 
 Antes de abrir un PR: `npm run lint`, `npm test` y `npm run build` sin errores (es lo mismo que corre CI).
 
-Verificación registrada el **4 de noviembre de 2026**: `npm test` pasó **81 pruebas en 11 archivos** y `npm run build` generó el build de producción correctamente.
+Verificación registrada el **10 de noviembre de 2026**: `npm test` pasó **122 pruebas en 22 archivos** y `npm run build` generó el build de producción correctamente.
 
 ### Pruebas
 
@@ -104,25 +104,27 @@ Reglas:
 | Ruta | Rol | Pantalla | Estado |
 |---|---|---|---|
 | `/login` | público | Inicio de sesión | Lista |
-| `/registro` | público | Registro de estudiantes (correo `u` + 11 dígitos + `@usco.edu.co`) | Lista |
-| `/estudiante` | ESTUDIANTE | Inicio del estudiante | En construcción |
+| `/registro?token=…` | público | Registro de estudiantes con invitación (correo `u` + 11 dígitos + `@usco.edu.co`) | Lista |
+| `/estudiante` | ESTUDIANTE | Inicio del estudiante: dashboard de progreso | Lista |
 | `/estudiante/diagnostico` | ESTUDIANTE | Prueba diagnóstica y resultado | Lista |
 | `/estudiante/practica` | ESTUDIANTE | Ejercicios adaptativos | Lista |
 | `/estudiante/progreso` | ESTUDIANTE | Dashboard Mi progreso | Lista |
 | `/docente` | DOCENTE | Dashboard de desempeño del grupo (SCRUM-40); el detalle del estudiante abre en un Drawer | Lista |
-| `/docente/estudiantes` | DOCENTE | Estudiantes y su detalle | En construcción |
+| `/docente/estudiantes` | DOCENTE | Carga del listado, estado de invitaciones y reenvío | Lista |
 | `/docente/actividades` | DOCENTE | Gestión de actividades y contenidos | Lista |
 | `/docente/reportes` | DOCENTE | Reportes | En construcción |
 | `/admin/usuarios` | ADMIN | Administración de usuarios (SCRUM-45) | Lista |
+| `/admin/grupos` | ADMIN | Grupos de los docentes y estudiantes inscritos (SCRUM-46) | Lista |
+| `/admin/actividades` | ADMIN | Contenidos y ejercicios de todos los docentes (SCRUM-46) | Lista |
 | `/admin` | ADMIN | Panel de administración (SCRUM-46) | Lista |
-| `/admin/roles` | ADMIN | Roles y permisos | En construcción |
+| `/admin/roles` | ADMIN | Roles y permisos: explicación y acceso a usuarios filtrados | Lista |
 | `/no-autorizado` | cualquiera | Acceso denegado | Lista |
 
 «En construcción»: la ruta y el menú existen, pero la pantalla todavía muestra `PaginaEnConstruccion`.
 
 ### Mi progreso del estudiante
 
-La ruta `/estudiante/progreso` está protegida para `ESTUDIANTE`, se carga dentro de `EstudianteLayout` y aparece como **Mi progreso** en el menú definido en `src/routes/navegacion.js`. La pantalla está implementada en `src/features/progreso/ProgresoPage.jsx`; usa `src/api/progresoApi.js` para llamar `GET /api/progreso/me` del backend.
+La ruta `/estudiante/progreso` está protegida para `ESTUDIANTE`, se carga dentro de `EstudianteLayout` y aparece como **Mi progreso** en el menú definido en `src/routes/navegacion.js`. La pantalla está implementada en `src/features/progreso/ProgresoPage.jsx`; usa `src/api/progresoApi.js` para llamar `GET /api/progreso/me` del backend. El inicio del estudiante (`/estudiante`) reutiliza ese mismo dashboard para que el login no termine en una página en construcción.
 
 La API del módulo llama al cliente Axios compartido `src/api/client.js`: la URL base sale de `VITE_API_URL`, el interceptor adjunta el token almacenado y la respuesta 401 sigue el flujo compartido de expiración de sesión. Los componentes no crean clientes HTTP propios ni calculan indicadores con cifras simuladas.
 
@@ -157,7 +159,11 @@ Cómo funciona la sesión (`AuthContext`):
 - Al abrir la app con una sesión guardada se llama a `GET /api/auth/me`. Con 401 (token alterado, usuario desactivado) o si el rol cambió, se cierra la sesión. Sin conexión con el backend, se conserva.
 - La sesión se cierra sola al vencer el token, ante un 401 de cualquier petición, al cerrarla en otra pestaña y si el navegador muestra con "Atrás" una página guardada en su caché.
 
-Registro: las reglas de `features/auth/reglasRegistro.js` deben coincidir con `RegistroRequest.java` y `ProgramaAcademico.java` del backend (el backend es la fuente de verdad).
+Registro: las reglas de `features/auth/reglasRegistro.js` deben coincidir con `RegistroRequest.java` y `ProgramaAcademico.java` del backend (el backend es la fuente de verdad). El registro está cerrado: `/registro` sin `?token=` muestra un aviso y no permite crear la cuenta.
+
+### Invitaciones de estudiantes
+
+El docente entra a `/docente/estudiantes`, elige un grupo y carga un CSV con columnas `correo;nombres;apellidos` (también se acepta coma). La tabla muestra el estado `Invitado`, `Registrado` o `Vencida` y permite reenviar el enlace. El estudiante abre `/registro?token=…`, ve el grupo y el correo precargados, elige su programa y crea la cuenta; al registrarse queda inscrito en el grupo y la invitación se marca como usada.
 
 ## 7. Convenciones de código
 
