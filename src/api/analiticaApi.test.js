@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import api from './client';
-import { obtenerDetalleEstudiante, obtenerResumenGrupo } from './analiticaApi';
+import { obtenerDetalleEstudiante, obtenerReporteGrupo, obtenerResumenGrupo } from './analiticaApi';
 
 vi.mock('./client', () => ({
   default: {
@@ -30,6 +30,16 @@ describe('analiticaApi', () => {
     ).resolves.toEqual({ estudiante: { id: 11 } });
     expect(api.get).toHaveBeenCalledWith('/analitica/grupos/1/estudiantes/11', {
       params: { desde: '2026-08-01', hasta: '2026-08-31' },
+    });
+  });
+
+  it('consulta el endpoint de reporte sin enviar filtros vacíos', async () => {
+    api.get.mockResolvedValue({ data: { estudiantes: [] } });
+    await expect(
+      obtenerReporteGrupo(4, { competencia: '', desde: '2026-08-01', hasta: '' }),
+    ).resolves.toEqual({ estudiantes: [] });
+    expect(api.get).toHaveBeenCalledWith('/analitica/grupos/4/reporte', {
+      params: { desde: '2026-08-01' },
     });
   });
 });

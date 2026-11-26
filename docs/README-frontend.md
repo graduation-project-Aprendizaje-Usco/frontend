@@ -50,7 +50,7 @@ Abre http://localhost:5173.
 
 Antes de abrir un PR: `npm run lint`, `npm test` y `npm run build` sin errores (es lo mismo que corre CI).
 
-Verificación registrada el **10 de noviembre de 2026**: `npm test` pasó **122 pruebas en 22 archivos** y `npm run build` generó el build de producción correctamente.
+Verificación registrada el **26 de noviembre de 2026**: `npm test` pasó **133 pruebas en 26 archivos** y `npm run build` generó el build de producción correctamente.
 
 ### Pruebas
 
@@ -114,15 +114,22 @@ Reglas:
 | `/docente` | DOCENTE | Dashboard de desempeño del grupo (SCRUM-40); el detalle del estudiante abre en un Drawer | Lista |
 | `/docente/estudiantes` | DOCENTE | Carga del listado, estado de invitaciones y reenvío | Lista |
 | `/docente/actividades` | DOCENTE | Gestión de actividades y contenidos | Lista |
-| `/docente/reportes` | DOCENTE | Reportes | En construcción |
+| `/docente/reportes` | DOCENTE | Reportes de grupo: indicadores, diagnóstico, estudiantes y errores frecuentes | Lista |
 | `/admin/usuarios` | ADMIN | Administración de usuarios (SCRUM-45) | Lista |
 | `/admin/grupos` | ADMIN | Grupos de los docentes y estudiantes inscritos (SCRUM-46) | Lista |
 | `/admin/actividades` | ADMIN | Contenidos y ejercicios de todos los docentes (SCRUM-46) | Lista |
 | `/admin` | ADMIN | Panel de administración (SCRUM-46) | Lista |
 | `/admin/roles` | ADMIN | Roles y permisos: explicación y acceso a usuarios filtrados | Lista |
+| `/admin/reportes` | ADMIN | Conteos agregados del sistema, actividad y resultados diagnósticos | Lista |
 | `/no-autorizado` | cualquiera | Acceso denegado | Lista |
 
 «En construcción»: la ruta y el menú existen, pero la pantalla todavía muestra `PaginaEnConstruccion`.
+
+### Reportes de administración y docentes
+
+`/admin/reportes` consulta `GET /api/admin/reportes` con fechas opcionales. Presenta conteos agregados y no expone nombres, correos ni identificadores de estudiantes. `/docente/reportes` permite seleccionar uno de los grupos del docente y filtrar por competencia y fechas; usa `GET /api/analitica/grupos/{grupoId}/reporte`, protegido también por la validación de pertenencia al grupo y sin correos en el DTO.
+
+Ambas pantallas permiten descargar un CSV compatible con Excel (con protección frente a fórmulas en valores de texto) y usar la impresión del navegador para guardar el reporte como PDF.
 
 ### Mi progreso del estudiante
 

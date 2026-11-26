@@ -14,6 +14,14 @@ export async function obtenerResumenGrupo(grupoId, filtros = {}) {
   return data;
 }
 
+/** Reporte de un grupo, con filas de estudiantes que no incluyen correo. */
+export async function obtenerReporteGrupo(grupoId, filtros = {}) {
+  const { data } = await api.get(`/analitica/grupos/${grupoId}/reporte`, {
+    params: parametros(filtros),
+  });
+  return data;
+}
+
 /** Detalle de un estudiante dentro de un grupo del docente. */
 export async function obtenerDetalleEstudiante(grupoId, estudianteId, filtros = {}) {
   const { data } = await api.get(`/analitica/grupos/${grupoId}/estudiantes/${estudianteId}`, {

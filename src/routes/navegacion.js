@@ -51,6 +51,7 @@ export const MENU_POR_ROL = {
     { etiqueta: 'Usuarios', ruta: '/admin/usuarios', icono: ManageAccountsOutlined },
     { etiqueta: 'Grupos', ruta: '/admin/grupos', icono: ClassOutlined },
     { etiqueta: 'Actividades', ruta: '/admin/actividades', icono: MenuBookOutlined },
+    { etiqueta: 'Reportes', ruta: '/admin/reportes', icono: AssessmentOutlined },
     { etiqueta: 'Roles y permisos', ruta: '/admin/roles', icono: AdminPanelSettingsOutlined },
   ],
 };

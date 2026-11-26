@@ -36,7 +36,7 @@ export default function GraficaCategorias({ distribucion = [] }) {
       <Typography component="figcaption" variant="h6" sx={{ fontWeight: 700 }}>
         Distribución de categorías
       </Typography>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+      <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
         Última categoría de diagnóstico registrada por estudiante.
       </Typography>
 
@@ -45,7 +45,7 @@ export default function GraficaCategorias({ distribucion = [] }) {
           Aún no hay diagnósticos registrados en el grupo.
         </Typography>
       ) : (
-        <Box aria-hidden="true" sx={{ width: '100%', height: 220 }}>
+        <Box aria-hidden="true" sx={{ width: '100%', height: 250, mt: 1 }}>
           <ResponsiveContainer width="100%" height="100%">
             <PieChart accessibilityLayer={false}>
               <Pie
@@ -53,9 +53,8 @@ export default function GraficaCategorias({ distribucion = [] }) {
                 dataKey="cantidad"
                 nameKey="nombre"
                 cx="50%"
-                cy="50%"
-                outerRadius={75}
-                label={({ nombre, cantidad }) => `${nombre}: ${cantidad}`}
+                cy="45%"
+                outerRadius={70}
                 isAnimationActive={false}
                 // El Pie de recharts es enfocable por defecto aunque la gráfica esté oculta (aria-hidden).
                 rootTabIndex={-1}
@@ -65,7 +64,7 @@ export default function GraficaCategorias({ distribucion = [] }) {
                 ))}
               </Pie>
               <Tooltip formatter={(valor) => [`${valor} estudiantes`, 'Cantidad']} />
-              <Legend />
+              <Legend height={48} />
             </PieChart>
           </ResponsiveContainer>
         </Box>
