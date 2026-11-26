@@ -1,0 +1,52 @@
+# Integración continua del frontend.
+# Instala dependencias, revisa el estilo (ESLint), corre las pruebas (Vitest) y genera el build de producción
+# en cada push y PR hacia develop y main. El job "build" es el check obligatorio
+# configurado en GitHub › Settings › Rules para poder fusionar.
+name: CI
+
+on:
+  push:
+    branches: [develop, main]
+  pull_request:
+    branches: [develop, main]
+  workflow_dispatch:
+
+# Si llega un push nuevo al mismo PR, se cancela la corrida anterior.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Descargar el código
+        uses: actions/checkout@v4
+
+      - name: Instalar Node 24 con caché de npm
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Revisar estilo (ESLint)
+        run: npm run lint
+
+      - name: Pruebas (Vitest)
+        run: npm test
+
+      # El build de CI no necesita un backend real: solo comprueba que compile.
+      - name: Generar build de producción
+        run: npm run build
+        env:
+          VITE_API_URL: http://localhost:8080/api
+          

@@ -72,4 +72,5 @@ node_modules/
 *.sln.iml
 
 # dist folder
-.dist/
+dist/
+

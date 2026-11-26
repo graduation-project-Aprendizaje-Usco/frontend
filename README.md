@@ -1,16 +1,10 @@
-# React + Vite
+# Aprendizaje USCO — Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+[![CI](https://github.com/aprendizaje-usco-project/aprendizaje-usco-frontend/actions/workflows/ci.yml/badge.svg?branch=develop)](https://github.com/aprendizaje-usco-project/aprendizaje-usco-frontend/actions/workflows/ci.yml?query=branch%3Adevelop)
 
-Currently, two official plugins are available:
+Interfaz web de **Aprendizaje USCO** (React 19 · Vite · MUI), plataforma de diagnóstico y práctica adaptativa para Cálculo Diferencial — Proyecto Integrador II, Universidad Surcolombiana.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- Cómo correrlo, variables de entorno y estructura: [docs/README-frontend.md](docs/README-frontend.md)
+- Convenciones de ramas, commits y PR: [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md)
 
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+La insignia muestra el estado de la integración continua en `develop`: lint, pruebas y build en cada PR, y un PR que no pasa no se puede fusionar.
