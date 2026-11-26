@@ -43,8 +43,7 @@ const esquema = z
   });
 
 /**
- * Crear o editar un usuario. Al crear, muestra la contraseña temporal una sola vez
- * antes de cerrar: el backend no la vuelve a entregar.
+ * Crear o editar un usuario. Al crear, confirma que se envió el enlace para configurar la contraseña.
  */
 export default function UsuarioFormDialog({ usuario, esUnoMismo, onCerrar, onGuardado }) {
   const esEdicion = Boolean(usuario?.id);
@@ -94,15 +93,11 @@ export default function UsuarioFormDialog({ usuario, esUnoMismo, onCerrar, onGua
         <DialogContent>
           <Stack spacing={2}>
             <Typography>
-              Entrégale a <strong>{creado.usuario.correo}</strong> esta contraseña temporal para su primer ingreso:
+              Se envió un correo a <strong>{creado.usuario.correo}</strong> con un enlace para que configure su contraseña.
             </Typography>
-            <Typography
-              component="p"
-              sx={{ fontFamily: 'monospace', fontSize: '1.4rem', letterSpacing: '0.08em', userSelect: 'all' }}
-            >
-              {creado.passwordTemporal}
-            </Typography>
-            <Alert severity="warning">Cópiala ahora: no se volverá a mostrar.</Alert>
+            <Alert severity="info">
+              El enlace es de un solo uso y vence en 7 días. Si vence, puedes reenviarlo desde la lista de usuarios.
+            </Alert>
           </Stack>
         </DialogContent>
         <DialogActions>

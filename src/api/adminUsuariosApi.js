@@ -1,6 +1,5 @@
 /**
  * Cliente de /api/admin/usuarios (SCRUM-45, solo ADMIN).
- * crear() responde { usuario, passwordTemporal }: la contraseña temporal solo llega una vez.
  */
 import api from './client';
 
@@ -30,4 +29,8 @@ export async function obtenerResumen() {
 export async function cambiarEstado(id, estado) {
   const { data } = await api.patch(`/admin/usuarios/${id}/estado`, { estado });
   return data;
+}
+
+export async function reenviarActivacion(id) {
+  await api.post(`/admin/usuarios/${id}/reenviar-activacion`);
 }

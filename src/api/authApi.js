@@ -37,6 +37,11 @@ export async function registro(datos) {
   return data;
 }
 
+/** POST /api/auth/activar-cuenta — define la contraseña usando un enlace de un solo uso. */
+export async function activarCuenta({ token, password }) {
+  await api.post('/auth/activar-cuenta', { token, password });
+}
+
 /**
  * GET /api/auth/me — usuario dueño del token guardado. 401 si no hay sesión válida.
  * @returns {Promise<{ id: number, nombres: string, correo: string, rol: string }>}

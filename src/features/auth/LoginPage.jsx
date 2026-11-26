@@ -41,6 +41,7 @@ export default function LoginPage() {
   const { user, login } = useAuth();
   const location = useLocation();
   const recienRegistrado = Boolean(location.state?.registrado);
+  const cuentaActivada = Boolean(location.state?.cuentaActivada);
   const [verPassword, setVerPassword] = useState(false);
   const [errorServidor, setErrorServidor] = useState('');
 
@@ -94,6 +95,11 @@ export default function LoginPage() {
         {recienRegistrado && !errorServidor && (
           <Alert severity="success" role="status">
             Tu cuenta quedó creada. Inicia sesión con tu correo y tu contraseña.
+          </Alert>
+        )}
+        {cuentaActivada && !errorServidor && (
+          <Alert severity="success" role="status">
+            Tu contraseña quedó configurada. Inicia sesión con tu correo y la nueva contraseña.
           </Alert>
         )}
 

@@ -1,6 +1,6 @@
 /**
  * Administración de usuarios (SCRUM-45 / RF-13): buscar, filtrar por rol y estado,
- * crear con contraseña temporal, editar (incluido el rol) y activar o desactivar.
+ * crear con enlace de configuración, editar (incluido el rol) y activar o desactivar.
  */
 import { useCallback, useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router';
@@ -26,7 +26,7 @@ import {
   Typography,
 } from '@mui/material';
 import AddOutlined from '@mui/icons-material/AddOutlined';
-import { cambiarEstado, listar } from '../../api/adminUsuariosApi';
+import { cambiarEstado, listar, reenviarActivacion } from '../../api/adminUsuariosApi';
 import { mensajeDeError } from '../../api/errores';
 import CargandoPagina from '../../components/CargandoPagina';
 import { useAuth } from '../../context/AuthContext';
@@ -49,6 +49,7 @@ export default function UsuariosPage() {
   const [formulario, setFormulario] = useState(undefined);
   const [porDesactivar, setPorDesactivar] = useState(null);
   const [aviso, setAviso] = useState('');
+  const [reenviandoId, setReenviandoId] = useState(null);
 
   useEffect(() => {
     document.title = 'Usuarios · Aprendizaje USCO';
@@ -81,6 +82,19 @@ export default function UsuariosPage() {
     } catch (e) {
       setPorDesactivar(null);
       setError(mensajeDeError(e, 'No pudimos cambiar el estado del usuario.'));
+    }
+  };
+
+  const reenviarEnlace = async (usuario) => {
+    setError('');
+    setReenviandoId(usuario.id);
+    try {
+      await reenviarActivacion(usuario.id);
+      setAviso(`Se reenvió el enlace de configuración a ${usuario.correo}.`);
+    } catch (e) {
+      setError(mensajeDeError(e, 'No pudimos reenviar el enlace de configuración.'));
+    } finally {
+      setReenviandoId(null);
     }
   };
 
@@ -182,17 +196,32 @@ export default function UsuariosPage() {
                         <TableCell sx={{ overflowWrap: 'anywhere' }}>{u.correo}</TableCell>
                         <TableCell>{ETIQUETA_ROL[u.rol]}</TableCell>
                         <TableCell>
-                          <Chip
-                            size="small"
-                            variant="outlined"
-                            color={activo ? 'success' : 'default'}
-                            label={activo ? 'Activo' : 'Inactivo'}
-                          />
+                          <Stack spacing={0.5} alignItems="flex-start">
+                            <Chip
+                              size="small"
+                              variant="outlined"
+                              color={activo ? 'success' : 'default'}
+                              label={activo ? 'Activo' : 'Inactivo'}
+                            />
+                            {u.configuracionPendiente && (
+                              <Chip size="small" color="warning" label="Contraseña pendiente" />
+                            )}
+                          </Stack>
                         </TableCell>
                         <TableCell align="right" sx={{ whiteSpace: 'nowrap' }}>
                           <Button size="small" onClick={() => setFormulario(u)} aria-label={`Editar a ${nombre}`}>
                             Editar
                           </Button>
+                          {u.configuracionPendiente && (
+                            <Button
+                              size="small"
+                              disabled={reenviandoId === u.id}
+                              onClick={() => reenviarEnlace(u)}
+                              aria-label={`Reenviar enlace a ${nombre}`}
+                            >
+                              {reenviandoId === u.id ? 'Enviando…' : 'Reenviar enlace'}
+                            </Button>
+                          )}
                           {activo ? (
                             <Button
                               size="small"

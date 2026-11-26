@@ -16,6 +16,7 @@ import NotFoundPage from '../features/errores/NotFoundPage';
 // Las páginas de cada rol se cargan bajo demanda (archivos separados en el build):
 // quien entra como estudiante no descarga el código del docente ni del administrador.
 const RegistroPage = lazy(() => import('../features/auth/RegistroPage'));
+const ActivarCuentaPage = lazy(() => import('../features/auth/ActivarCuentaPage'));
 
 const InicioEstudiantePage = lazy(() => import('../features/progreso/InicioEstudiantePage'));
 const DiagnosticoPage = lazy(() => import('../features/diagnostico/DiagnosticoPage'));
@@ -51,6 +52,7 @@ export default function AppRouter() {
         <Route path="/" element={<RedireccionInicial />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/registro" element={<RegistroPage />} />
+        <Route path="/activar-cuenta" element={<ActivarCuentaPage />} />
         <Route path="/no-autorizado" element={<NoAutorizadoPage />} />
 
         {/* Solo desarrollo */}

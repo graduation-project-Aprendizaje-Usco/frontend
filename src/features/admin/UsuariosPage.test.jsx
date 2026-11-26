@@ -1,7 +1,7 @@
 import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { actualizar, cambiarEstado, crear, listar } from '../../api/adminUsuariosApi';
+import { actualizar, cambiarEstado, crear, listar, reenviarActivacion } from '../../api/adminUsuariosApi';
 import { guardarSesion, renderConApp, tokenDePrueba } from '../../test/utilidades';
 import UsuariosPage from './UsuariosPage';
 
@@ -11,6 +11,7 @@ vi.mock('../../api/adminUsuariosApi', () => ({
   crear: vi.fn(),
   actualizar: vi.fn(),
   cambiarEstado: vi.fn(),
+  reenviarActivacion: vi.fn(),
 }));
 
 const ADMIN_ID = 1;
@@ -51,8 +52,10 @@ describe('UsuariosPage', () => {
     );
   });
 
-  it('crea un usuario y muestra la contraseña temporal una sola vez', async () => {
-    crear.mockResolvedValue({ usuario: { ...usuarios[1], id: 9, correo: 'nuevo@usco.edu.co' }, passwordTemporal: 'Ab3dEf7hJk9m' });
+  it('crea un usuario y confirma el envío del enlace de configuración', async () => {
+    crear.mockResolvedValue({
+      usuario: { ...usuarios[1], id: 9, correo: 'nuevo@usco.edu.co', configuracionPendiente: true },
+    });
     const usuario = await abrir();
 
     await usuario.click(screen.getByRole('button', { name: 'Nuevo usuario' }));
@@ -65,10 +68,25 @@ describe('UsuariosPage', () => {
     expect(crear).toHaveBeenCalledWith({
       nombres: 'Nuevo', apellidos: 'Docente', correo: 'nuevo@usco.edu.co', rol: 'DOCENTE', programaAcademico: null,
     });
-    expect(await screen.findByText('Ab3dEf7hJk9m')).toBeInTheDocument();
-    expect(screen.getByText('Cópiala ahora: no se volverá a mostrar.')).toBeInTheDocument();
+    expect(await screen.findByText(/Se envió un correo a/)).toBeInTheDocument();
+    expect(screen.getByText(/El enlace es de un solo uso y vence en 7 días/)).toBeInTheDocument();
     await usuario.click(screen.getByRole('button', { name: 'Listo' }));
-    expect(screen.queryByText('Ab3dEf7hJk9m')).not.toBeInTheDocument();
+    expect(screen.queryByText(/contraseña temporal/i)).not.toBeInTheDocument();
+  });
+
+  it('permite reenviar el enlace mientras la cuenta está pendiente', async () => {
+    listar.mockResolvedValue([
+      usuarios[0],
+      { ...usuarios[1], configuracionPendiente: true },
+      usuarios[2],
+    ]);
+    reenviarActivacion.mockResolvedValue();
+    const usuario = await abrir();
+
+    await usuario.click(screen.getByRole('button', { name: 'Reenviar enlace a Diego Docente' }));
+
+    expect(reenviarActivacion).toHaveBeenCalledWith(2);
+    expect(await screen.findByText(/Se reenvió el enlace de configuración a diego@usco.edu.co/)).toBeInTheDocument();
   });
 
   it('exige correo de estudiante y programa cuando el rol es Estudiante', async () => {

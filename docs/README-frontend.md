@@ -105,6 +105,7 @@ Reglas:
 |---|---|---|---|
 | `/login` | público | Inicio de sesión | Lista |
 | `/registro?token=…` | público | Registro de estudiantes con invitación (correo `u` + 11 dígitos + `@usco.edu.co`) | Lista |
+| `/activar-cuenta?token=…` | público | Definir la contraseña de una cuenta creada por administración | Lista |
 | `/estudiante` | ESTUDIANTE | Inicio del estudiante: dashboard de progreso | Lista |
 | `/estudiante/diagnostico` | ESTUDIANTE | Prueba diagnóstica y resultado | Lista |
 | `/estudiante/practica` | ESTUDIANTE | Ejercicios adaptativos | Lista |
