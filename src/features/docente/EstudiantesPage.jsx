@@ -6,9 +6,11 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   Alert,
+  Avatar,
   Box,
   Button,
   Chip,
+  Divider,
   MenuItem,
   Paper,
   Stack,
@@ -24,6 +26,7 @@ import {
 import DownloadOutlined from '@mui/icons-material/DownloadOutlined';
 import UploadFileOutlined from '@mui/icons-material/UploadFileOutlined';
 import CargandoPagina from '../../components/CargandoPagina';
+import InvitarEstudianteCard from './components/InvitarEstudianteCard';
 import { listar as listarGrupos } from '../../api/gruposApi';
 import {
   cargarInvitaciones,
@@ -173,7 +176,8 @@ export default function EstudiantesPage() {
           Estudiantes e invitaciones
         </Typography>
         <Typography color="text.secondary">
-          Carga el listado del grupo; cada estudiante recibe un enlace de un solo uso para crear su cuenta.
+          Invita individualmente o carga el listado del grupo; cada estudiante recibe un enlace
+          de un solo uso para crear su cuenta.
         </Typography>
       </Box>
 
@@ -194,35 +198,56 @@ export default function EstudiantesPage() {
                 <MenuItem key={grupo.id} value={grupo.id}>{grupo.nombre} ({grupo.codigo})</MenuItem>
               ))}
             </TextField>
-            <Button variant="outlined" startIcon={<DownloadOutlined />} onClick={descargarPlantilla}>
-              Descargar plantilla
-            </Button>
           </Stack>
 
-          <Paper variant="outlined" sx={{ p: 2 }}>
-            <Stack spacing={2}>
-              <Typography variant="h6" component="h2">Cargar listado</Typography>
-              <Typography variant="body2" color="text.secondary">
-                Archivo CSV con columnas <strong>correo;nombres;apellidos</strong>. También se acepta separado por comas.
-              </Typography>
-              <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ alignItems: { sm: 'center' } }}>
-                <Button component="label" variant="outlined" startIcon={<UploadFileOutlined />}>
-                  Elegir CSV
-                  <input hidden type="file" accept=".csv,text/csv" onChange={leerArchivo} />
-                </Button>
-                {nombreArchivo && (
-                  <Typography variant="body2" color="text.secondary">
-                    {nombreArchivo}: {filasCsv.length} filas listas
-                  </Typography>
-                )}
-                <Button variant="contained" onClick={enviar} disabled={enviando || filasCsv.length === 0}>
-                  {enviando ? 'Enviando…' : `Enviar ${filasCsv.length || ''} invitaciones`}
+          <Stack direction={{ xs: 'column', md: 'row' }} spacing={3} sx={{ alignItems: 'stretch' }}>
+            <InvitarEstudianteCard grupoId={grupoId} onInvitado={cargar} />
+
+            <Paper variant="outlined" sx={{ flex: 1, minWidth: 0, p: 2 }}>
+              <Stack spacing={2}>
+                <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center' }}>
+                  <Avatar sx={{ bgcolor: 'secondary.main', color: 'secondary.contrastText' }}>
+                    <UploadFileOutlined />
+                  </Avatar>
+                  <Box>
+                    <Typography variant="h6" component="h2">Carga masiva</Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Invita a todo un listado desde un archivo CSV.
+                    </Typography>
+                  </Box>
+                </Stack>
+                <Divider />
+                <Typography variant="body2" color="text.secondary">
+                  Archivo CSV con columnas <strong>correo;nombres;apellidos</strong>. También se acepta separado por comas.
+                </Typography>
+                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} useFlexGap sx={{ alignItems: { sm: 'center' }, flexWrap: 'wrap' }}>
+                  <Button component="label" variant="outlined" startIcon={<UploadFileOutlined />}>
+                    Elegir CSV
+                    <input hidden type="file" accept=".csv,text/csv" onChange={leerArchivo} />
+                  </Button>
+                  {nombreArchivo && (
+                    <Typography variant="body2" color="text.secondary">
+                      {nombreArchivo}: {filasCsv.length} filas listas
+                    </Typography>
+                  )}
+                  <Button variant="contained" onClick={enviar} disabled={enviando || filasCsv.length === 0}>
+                    {enviando ? 'Enviando…' : `Enviar ${filasCsv.length || ''} invitaciones`}
+                  </Button>
+                </Stack>
+                <Button
+                  variant="text"
+                  startIcon={<DownloadOutlined />}
+                  onClick={descargarPlantilla}
+                  sx={{ alignSelf: 'flex-start' }}
+                >
+                  Descargar plantilla CSV
                 </Button>
               </Stack>
-              {aviso && <Alert severity="success" role="status">{aviso}</Alert>}
-              {error && <Alert severity="error">{error}</Alert>}
-            </Stack>
-          </Paper>
+            </Paper>
+          </Stack>
+
+          {aviso && <Alert severity="success" role="status">{aviso}</Alert>}
+          {error && <Alert severity="error">{error}</Alert>}
 
           <Paper variant="outlined" component="section" aria-labelledby="titulo-invitaciones">
             <Typography id="titulo-invitaciones" variant="body2" color="text.secondary" aria-live="polite" sx={{ p: 2 }}>
