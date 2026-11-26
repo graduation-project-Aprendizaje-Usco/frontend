@@ -25,6 +25,7 @@ dist-ssr
 .env
 .env.development
 .env.production
+!.env.production
 
 # Node.js Tools for Visual Studio
 .ntvs_analysis.dat
