@@ -40,7 +40,7 @@ function filasCsv(reporte) {
     ...reporte.estudiantes.map((estudiante) => [
       'Estudiante',
       `${estudiante.apellidos}, ${estudiante.nombres}`,
-      `Riesgo: ${estudiante.enRiesgo ? 'Sí' : 'No'}; promedio: ${estudiante.promedio ?? 'Sin actividad'}; diagnóstico: ${estudiante.categoriaDiagnostico}; intentos: ${estudiante.intentos}`,
+      `Riesgo: ${estudiante.enRiesgo ? 'Sí' : 'No'}; promedio de práctica: ${estudiante.promedio ?? 'Sin actividad'}; resultado diagnóstico: ${estudiante.porcentajeDiagnostico ?? 'Sin diagnóstico'}%; categoría: ${estudiante.categoriaDiagnostico}; intentos: ${estudiante.intentos}`,
     ]),
     ...reporte.topEjerciciosErrores.map((ejercicio) => [
       'Ejercicio',

@@ -27,9 +27,10 @@ export default function TablaEstudiantesReporte({ estudiantes = [] }) {
             <TableHead>
               <TableRow>
                 <TableCell component="th" scope="col">Estudiante</TableCell>
-                <TableCell component="th" scope="col" align="right">Promedio</TableCell>
+                <TableCell component="th" scope="col" align="right">Promedio práctica</TableCell>
+                <TableCell component="th" scope="col" align="right">Resultado diagnóstico</TableCell>
                 <TableCell component="th" scope="col">Nivel</TableCell>
-                <TableCell component="th" scope="col">Diagnóstico</TableCell>
+                <TableCell component="th" scope="col">Categoría</TableCell>
                 <TableCell component="th" scope="col" align="right">Intentos</TableCell>
                 <TableCell component="th" scope="col">Riesgo</TableCell>
               </TableRow>
@@ -44,6 +45,11 @@ export default function TablaEstudiantesReporte({ estudiantes = [] }) {
                     </TableCell>
                     <TableCell align="right">
                       {estudiante.promedio == null ? '—' : formatearPorcentaje(estudiante.promedio)}
+                    </TableCell>
+                    <TableCell align="right">
+                      {estudiante.porcentajeDiagnostico == null
+                        ? '—'
+                        : formatearPorcentaje(estudiante.porcentajeDiagnostico)}
                     </TableCell>
                     <TableCell>{formatearNivel(estudiante.nivel)}</TableCell>
                     <TableCell>

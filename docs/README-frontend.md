@@ -127,7 +127,7 @@ Reglas:
 
 ### Reportes de administración y docentes
 
-`/admin/reportes` consulta `GET /api/admin/reportes` con fechas opcionales. Presenta conteos agregados y no expone nombres, correos ni identificadores de estudiantes. `/docente/reportes` permite seleccionar uno de los grupos del docente y filtrar por competencia y fechas; usa `GET /api/analitica/grupos/{grupoId}/reporte`, protegido también por la validación de pertenencia al grupo y sin correos en el DTO.
+`/admin/reportes` consulta `GET /api/admin/reportes` con fechas opcionales. Presenta conteos agregados y no expone nombres, correos ni identificadores de estudiantes. `/docente/reportes` permite seleccionar uno de los grupos del docente y filtrar por competencia y fechas; usa `GET /api/analitica/grupos/{grupoId}/reporte`, protegido también por la validación de pertenencia al grupo y sin correos en el DTO. La tabla distingue el promedio de práctica del porcentaje del último diagnóstico para no confundir ambos resultados.
 
 Ambas pantallas permiten descargar un CSV compatible con Excel (con protección frente a fórmulas en valores de texto) y usar la impresión del navegador para guardar el reporte como PDF.
 
