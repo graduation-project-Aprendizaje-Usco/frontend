@@ -14,6 +14,14 @@ export async function cargarInvitaciones(grupoId, estudiantes) {
   return data;
 }
 
+/** Invita a un solo estudiante reutilizando el endpoint de lote. */
+export async function invitarEstudiante(grupoId, estudiante) {
+  const { data } = await api.post(`/grupos/${grupoId}/invitaciones`, {
+    estudiantes: [estudiante],
+  });
+  return data[0];
+}
+
 export async function reenviarInvitacion(grupoId, invitacionId) {
   const { data } = await api.post(`/grupos/${grupoId}/invitaciones/${invitacionId}/reenviar`);
   return data;
